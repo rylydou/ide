@@ -1,0 +1,16 @@
+import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core'
+
+
+export const project = pgTable('project', {
+	id: serial('id').primaryKey(),
+	name: text('name').default('Untitled Project').notNull(),
+	created_at: timestamp('created_at').defaultNow().notNull(),
+
+	updated_at: timestamp('updated_at').defaultNow().notNull(),
+	code_html: text('code_html').default('').notNull(),
+	code_css: text('code_css').default('').notNull(),
+})
+
+
+export type Project = typeof project.$inferSelect
+export type NewProject = typeof project.$inferInsert
