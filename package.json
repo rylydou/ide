@@ -1,26 +1,27 @@
 {
-  "name": "builder",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@vercel/postgres": "^0.5.1",
-    "drizzle-orm": "^0.29.3",
-    "next": "14.0.4",
-    "pocketbase": "^0.20.1",
-    "react": "^18",
-    "react-dom": "^18"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "sass": "^1.69.7",
-    "typescript": "^5"
-  }
+	"name": "builder",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev --host",
+		"build": "vite build",
+		"preview": "vite preview --host"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^3",
+		"@sveltejs/kit": "^2",
+		"@sveltejs/vite-plugin-svelte": "^3",
+		"drizzle-kit": "^0.20",
+		"svelte": "^4",
+		"tslib": "^2",
+		"typescript": "^5",
+		"vite": "^5"
+	},
+	"dependencies": {
+		"@neondatabase/serverless": "^0.7",
+		"@vercel/postgres": "^0.5",
+		"drizzle-orm": "^0.29",
+		"zod": "^3"
+	},
+	"type": "module"
 }

@@ -1,13 +1,8 @@
-import { sql } from '@vercel/postgres'
 import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/vercel-postgres'
-import * as schema from './schema'
+import { db, schema } from './db'
 
 
-export * as schema from './schema'
-
-
-export const db = drizzle(sql, { schema })
+export * from './db'
 
 
 export const create_user = async (user_init: schema.NewUser) => {
