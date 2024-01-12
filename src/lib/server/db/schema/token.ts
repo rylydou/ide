@@ -3,18 +3,18 @@ import { date, integer, pgTable, serial, text } from 'drizzle-orm/pg-core'
 import { user } from '.'
 
 
-export const token = pgTable('token', {
+export const session = pgTable('session', {
 	id: serial('id').primaryKey(),
-	secret: text('secret').notNull(),
+	token: text('token').notNull(),
 
 	create_at: date('created_at').defaultNow().notNull(),
 	max_age: integer('max_age').default(34560000).notNull(), // 400 days in seconds (the max)
 })
 
-export const token_relations = relations(token, ({ one }) => ({
+export const token_relations = relations(session, ({ one }) => ({
 	user: one(user).withFieldName('user'),
 }))
 
 
-export type Token = typeof token.$inferSelect
-export type NewToken = typeof token.$inferInsert
+export type Token = typeof session.$inferSelect
+export type NewToken = typeof session.$inferInsert
