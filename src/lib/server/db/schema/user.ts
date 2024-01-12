@@ -1,6 +1,6 @@
-import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core'
-import * as schema from '.'
 import { relations } from 'drizzle-orm'
+import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core'
+import { project } from '.'
 
 
 export const user = pgTable('user', {
@@ -12,8 +12,7 @@ export const user = pgTable('user', {
 
 
 export const user_relations = relations(user, ({ many }) => ({
-	tokens: many(schema.token).withFieldName('tokens'),
-	projects: many(schema.project).withFieldName('projects'),
+	projects: many(project).withFieldName('projects'),
 }))
 
 

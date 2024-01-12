@@ -41,12 +41,11 @@ export const actions: Actions = {
 			password: data.password,
 		})
 
-		const token_data = nanoid()
 		const token = (await db.insert(schema.token).values({
-			token: token_data,
+			secret: nanoid(),
 		}).returning())[0]
 
-		cookies.set('token', token.token, {
+		cookies.set('token', token.secret, {
 			maxAge: token.max_age,
 			path: '/',
 			secure: true,

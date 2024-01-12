@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { applyAction, enhance } from '$app/forms'
+	import { enhance } from '$app/forms'
 	import { debounce } from '$lib'
 
 	let secret_input = 'test'
 	let group_name = ''
+
+	let error_message = ''
 
 	const handle_group = () => {
 		group_name = secret_input
@@ -12,10 +14,17 @@
 
 <main>
 	<form
+		class="form center-form"
 		method="POST"
 		use:enhance={() => {
 			return async ({ result }) => {
-				const data = {}
+				const is_ok = result.type == 'success' || result.type == 'redirect'
+				if (!is_ok) {
+					error_message =
+						// @ts-ignore
+						result?.data?.message || result?.error?.message || 'An unknown error occurred.'
+					return
+				}
 			}
 		}}
 	>
@@ -32,7 +41,7 @@
 
 		<label>
 			<span>Full name</span>
-			<input type="text" name="name" autocomplete="name" value="Ryly Dou" />
+			<input class="input" type="text" name="name" autocomplete="name" value="Ryly Dou" />
 		</label>
 
 		<label>
@@ -46,10 +55,10 @@
 			/>
 		</label>
 
-		<button type="submit" class="btn" disabled={!group_name}>
-			Create Account
+		<button class="btn" type="submit" disabled={!group_name}>
+			Join
 			{#if group_name}
-				& Join {group_name}
+				"{group_name}"
 			{/if}
 		</button>
 	</form>

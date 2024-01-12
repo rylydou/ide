@@ -1,0 +1,115 @@
+@font-face {
+	font-family: 'Fira Sans';
+	src: url('/fonts/fira-sans.woff2') format('woff2');
+	font-weight: 100 900;
+	font-display: swap;
+	font-style: normal;
+}
+
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	src: url('/fonts/jetbrains-mono.woff2') format('woff2');
+	font-weight: 100 800;
+	font-display: swap;
+	font-style: normal;
+}
+
+
+html {
+	--clr-base: #242022;
+	--clr-bg: #302c2e;
+	--clr-bg-hover: #3d393b;
+	--clr-fg: #cfc6b8;
+
+	--clr-muted-accent: #8e478c;
+	--clr-accent: #cd6093;
+	--clr-on-accent: #ffffff;
+
+	--clr-muted-bg: #5a5353;
+	--clr-muted-fg: #7d7071;
+
+	--font-body: 'Fira Sans', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+
+html {
+	user-select: none;
+
+	font-family: var(--font-body);
+	font-size: 1rem;
+	line-height: 1.5rem;
+
+	background-color: var(--clr-base);
+	color: var(--clr-fg);
+}
+
+
+button {
+	cursor: pointer;
+}
+
+
+.btn {
+	padding: 8px;
+	font-weight: bold;
+	border-radius: 6px;
+	background-color: var(--clr-bg);
+
+	&:not(:disabled) {
+
+		&:hover,
+		&:focus-visible {
+			background-color: var(--clr-bg-hover);
+		}
+
+		&:focus-visible {
+			outline: solid 2px currentColor;
+			outline-offset: 2px;
+		}
+	}
+
+
+	&:disabled {
+		cursor: default;
+		opacity: .33;
+	}
+}
+
+
+.form {
+	width: 24rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+
+
+	label {
+		display: flex;
+		flex-direction: column;
+
+		>span {
+			padding-bottom: 4px;
+			font-weight: bold;
+		}
+	}
+
+}
+
+// Style explicitly marked .input and auto style inputs of .form
+.input,
+.form input:where([type=text], [type=password]) {
+	padding: 8px;
+	border-radius: 6px;
+	background-color: var(--clr-bg);
+
+	&:focus-visible {
+		outline: solid 2px currentColor;
+	}
+}
+
+
+.center-form {
+	margin: 4rem auto;
+}
