@@ -3,6 +3,7 @@ import type { Actions } from './$types'
 import { z } from 'zod'
 import { db, schema } from '$lib/server'
 import { eq } from 'drizzle-orm'
+import { ADMIN_SECRET } from '$env/static/private'
 
 
 export type FormResponse = {
@@ -30,12 +31,14 @@ export const actions: Actions = {
 
 		const data = result.data
 
+		const is_admin = data.secret === ADMIN_SECRET
+
 		const group = await db.query.group.findFirst({
 			where: eq(schema.group.secret, data.secret),
 			columns: { id: true, }
 		})
 
-		if (!group) {
+		if (!group && !is_admin) {
 			return fail(401, {
 				message: 'Invalid secret code'
 			})

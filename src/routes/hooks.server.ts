@@ -1,5 +1,5 @@
 import { db, schema } from '$lib/server'
-import type { Handle, MaybePromise, RequestEvent } from '@sveltejs/kit'
+import { type Handle } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
 
 
@@ -11,23 +11,34 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return await resolve(event)
 	}
 
+	// find session
 	const session = await db.query.session.findFirst({ where: eq(schema.session.token, session_token) })
 	if (!session) {
 		event.locals.session = null
 		return await resolve(event)
 	}
 
-	const user = await db.query.user.findFirst({ where: eq(schema.session.token, session_token) })
+	// check if session is expired
+	if (session.expires < new Date()) {
+		event.locals.session = null
+		return await resolve(event)
+	}
+
+	// find user assigned to session
+	const user = await db.query.user.findFirst({ where: eq(schema.user.id, session.user_id) })
 	if (!user) {
 		event.locals.session = null
 		return await resolve(event)
 	}
 
+	const expires = new Date()
+	expires.setUTCDate(expires.getUTCDate() + 30)
+	session.expires = expires
 	event.cookies.set('session_token', session?.token, {
 		path: '/',
 		sameSite: 'lax',
 		secure: true,
-		maxAge: 34560000,
+		expires: session.expires,
 	})
 
 	event.locals.session = {
@@ -36,7 +47,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		user: {
 			id: user.id,
 			name: user.name,
-		}
+		},
 	}
 
 	return await resolve(event)

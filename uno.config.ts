@@ -1,7 +1,7 @@
 import { SVG, cleanupSVG, isEmptyColor, parseColors, runSVGO } from '@iconify/tools'
 import { FileSystemIconLoader } from '@iconify/utils/lib/loader/node-loaders'
 import extractorSvelte from '@unocss/extractor-svelte'
-import { defineConfig, presetIcons, presetUno } from 'unocss'
+import { defineConfig, presetIcons } from 'unocss'
 
 
 const transform_svg = (str: string) => {

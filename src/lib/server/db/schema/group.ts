@@ -5,8 +5,7 @@ import { table } from './table'
 export const group = table('group', {
 	id: serial('id').primaryKey(),
 	name: text('name').notNull(),
-	secret: text('secret').notNull().unique('group-secret'),
+	secret: text('secret').unique('group-secret'),
 
-	teacher_ids: integer('teacher_ids').array().notNull(),
-	student_ids: integer('student_ids').array().notNull(),
+	user_ids: integer('user_ids').array().notNull(),
 })

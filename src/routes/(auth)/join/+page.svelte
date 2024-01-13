@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms'
 
-	let message = 'Test message'
+	let message = ''
 
 	let is_waiting = false
 	let secret_input = ''
@@ -39,11 +39,13 @@
 				class="password"
 				name="secret"
 				autocomplete="off"
+				autofocus
 				bind:value={secret_input}
+				on:input={() => (message = '')}
 			/>
 		</label>
 
-		<button class="btn" type="submit" disabled={!secret_input || is_waiting}>Join</button>
+		<button type="submit" class="btn" disabled={!secret_input || is_waiting}>Join</button>
 
 		<span>Already joined a class? <a class="link" href="/login">Log in instead</a></span>
 

@@ -33,21 +33,31 @@
 		}}
 	>
 		<div class="tabs">
-			<a class="tab" href="/register">Register</a>
-			<a class="tab" href="/login" aria-current="location">Login</a>
+			<a class="tab" href="/register/admin" aria-current="location">Register as Admin</a>
+			<a class="tab" href="/login">Login</a>
 		</div>
 
 		<label>
-			<span>School Email (no need for {cfg.default_email_domain})</span>
-			<input class="input" type="text" name="email" autocomplete="email" autofocus />
+			<span>Secret</span>
+			<PasswordInput name="secret" autocomplete="off" autofocus />
+		</label>
+
+		<label>
+			<span>Admin email</span>
+			<input class="input" type="text" name="email" autocomplete="email" />
+		</label>
+
+		<label>
+			<span>Full name</span>
+			<input class="input" type="text" name="name" autocomplete="name" />
 		</label>
 
 		<label>
 			<span>Password</span>
-			<PasswordInput name="password" autocomplete="new-password" disabled={is_waiting} />
+			<PasswordInput name="password" autocomplete="new-password" />
 		</label>
 
-		<button type="submit" class="btn"> Login </button>
+		<button type="submit" class="btn" disabled={is_waiting}>Register</button>
 
 		<div class="message">
 			{message}

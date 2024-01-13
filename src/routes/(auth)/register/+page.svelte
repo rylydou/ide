@@ -1,22 +1,33 @@
 <script lang="ts">
-	import { enhance } from '$app/forms'
+	import { applyAction, enhance } from '$app/forms'
+	import { cfg } from '$lib'
 	import { PasswordInput } from '$lib/components'
 
-	let error_message = ''
+	let message = ''
+	let is_waiting = false
 </script>
 
 <main class="layout-center">
 	<form
-		class="form center-form"
+		class="form center-form form-tabbed"
 		method="POST"
 		use:enhance={() => {
+			is_waiting = true
+
 			return async ({ result }) => {
-				const is_ok = result.type == 'success' || result.type == 'redirect'
-				if (!is_ok) {
-					error_message =
-						// @ts-ignore
-						result?.data?.message || result?.error?.message || 'An unknown error occurred.'
-					return
+				console.log({ result })
+				is_waiting = false
+
+				switch (result.type) {
+					case 'redirect':
+					case 'success':
+						return await applyAction(result)
+					case 'failure':
+						message = result.data?.message?.toString() || 'Something went wrong'
+						return
+					case 'error':
+						message = result?.error?.toString() || 'An error occurred'
+						return
 				}
 			}
 		}}
@@ -27,15 +38,24 @@
 		</div>
 
 		<label>
+			<span>School email (no need for {cfg.default_email_domain})</span>
+			<input class="input" type="text" name="email" autocomplete="email" autofocus />
+		</label>
+
+		<label>
 			<span>Full name</span>
-			<input class="input" type="text" name="name" autocomplete="name" value="Ryly Dou" />
+			<input class="input" type="text" name="name" autocomplete="name" />
 		</label>
 
 		<label>
 			<span>Password</span>
-			<PasswordInput name="password" autocomplete="new-password" value="password" />
+			<PasswordInput name="password" autocomplete="new-password" />
 		</label>
 
-		<button class="btn" type="submit"> Register </button>
+		<button type="submit" class="btn" disabled={is_waiting}>Register</button>
+
+		<div class="message">
+			{message}
+		</div>
 	</form>
 </main>

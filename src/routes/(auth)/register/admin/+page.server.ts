@@ -6,42 +6,17 @@ import { eq, ilike } from 'drizzle-orm'
 import { grant_session, join_group } from '$lib/server/actions'
 
 
-export const load: PageServerLoad = async ({ cookies }) => {
-	const join_secret = (cookies.get('join-secret') || '').trim()
-
-	const group = join_secret ? await db.query.group.findFirst({
-		where: ilike(schema.group.secret, join_secret),
-	}) : null
-
-	if (!group) {
-		throw redirect(303, '/join')
-	}
-
-	return {
-		group,
-	}
-}
-
-
 export const actions: Actions = {
 	default: async ({ request, cookies, url }) => {
 		const data_schema = z.object({
-			secret: z.string().trim().toLowerCase().min(6).max(6),
+			secret: z.string(),
 			email: z.string().trim().toLowerCase(),
 			name: z.string().min(3),
 			password: z.string().min(8),
 		})
 
-		const secret = url.searchParams.get('secret')
-		if (!secret) {
-			throw redirect(303, '/join')
-		}
-
 		const form_data = Object.fromEntries(await request.formData())
-		const result = await data_schema.safeParseAsync({
-			...form_data,
-			secret,
-		})
+		const result = await data_schema.safeParseAsync({ ...form_data, })
 
 		if (!result.success) {
 			return fail(400, {

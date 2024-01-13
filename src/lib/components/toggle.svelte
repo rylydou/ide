@@ -1,12 +1,8 @@
 <script lang="ts">
 	export let value = false
-
-	const click = () => {
-		value = !value
-	}
 </script>
 
-<button class="toggle" on:click={click} {...$$restProps}>
+<button type="button" class="toggle" on:click={() => (value = !value)} {...$$restProps}>
 	{#if value}
 		<slot name="on">On</slot>
 	{:else}

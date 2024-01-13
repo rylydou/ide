@@ -22,6 +22,9 @@ html {
 	--clr-bg-hover: #3d393b;
 	--clr-fg: #cfc6b8;
 
+	--clr-input-bg: #181516;
+	--clr-input-fg: #cfc6b8;
+
 	--clr-muted-accent: #8e478c;
 	--clr-accent: #cd6093;
 	--clr-on-accent: #ffffff;
@@ -35,6 +38,7 @@ html {
 	--font-body: 'Fira Sans', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
+	--radius-sm: 3px;
 	--radius: 6px;
 	--radius-lg: 12px;
 }
@@ -75,9 +79,18 @@ button {
 
 
 .link {
-	color: var(--clr-accent);
 	text-decoration: underline 1px;
 	text-underline-offset: 2px;
+	border-radius: var(--radius-sm);
+	color: var(--clr-accent);
+
+	&:hover,
+	&:focus-visible {
+		outline: solid 2px var(--clr-accent);
+		text-decoration: none;
+		background-color: var(--clr-accent);
+		color: #000;
+	}
 }
 
 
@@ -136,6 +149,7 @@ button {
 		align-items: center;
 		justify-content: center;
 		padding: 12px;
+		font-weight: bold;
 		border: solid 2px var(--clr-warn-fg);
 		border-radius: var(--radius-lg);
 		background-color: var(--clr-warn-bg);
@@ -148,20 +162,39 @@ button {
 }
 
 
+.form-tabbed {
+	min-height: 30rem;
+}
+
+
 // Style explicitly marked .input and auto style inputs of .form
 .input,
 .form input:where([type=text], [type=password]) {
-	padding: 8px;
+	min-height: 2.5rem;
+	padding-inline: 8px;
 	border-radius: 6px;
 	background-color: var(--clr-bg);
+	border: solid 2px var(--clr-bg);
+	background-color: var(--clr-input-bg);
+	color: var(--clr-input-fg);
 
-	&:focus-visible {
+	&::placeholder {
+		color: var(--clr-muted-fg);
+		opacity: 1;
+	}
+
+	&:focus {
 		outline: solid 2px currentColor;
+		// background-color: var(--clr-base);
 	}
 
 	&[type=password],
 	&.password {
 		font-family: var(--font-mono);
+
+		&::placeholder {
+			font-family: var(--font-body);
+		}
 	}
 }
 
@@ -171,6 +204,7 @@ button {
 	display: flex;
 	justify-content: stretch;
 	padding: 6px;
+	gap: 6px;
 	border-radius: var(--radius-lg);
 	background-color: var(--clr-bg);
 
@@ -206,5 +240,50 @@ button {
 
 	input {
 		flex-grow: 1;
+	}
+}
+
+
+[data-tooltip] {
+	position: relative;
+
+	&::before,
+	&::after {
+		opacity: 0;
+		font-weight: normal;
+		font-family: var(--font-body);
+		background-color: var(--clr-input-bg);
+		color: var(--clr-input-fg);
+		transition: opacity 150ms;
+	}
+
+	&::before {
+		content: '';
+		pointer-events: none;
+		position: absolute;
+		top: -1rem;
+		width: 12px;
+		height: 12px;
+		// border-radius: var(--radius);
+		rotate: 45deg;
+	}
+
+	&::after {
+		content: attr(data-tooltip);
+		pointer-events: none;
+		position: absolute;
+		top: -2.5rem;
+		width: max-content;
+		padding: 4px 8px;
+		border-radius: var(--radius);
+	}
+
+	&:hover {
+
+		&::before,
+		&::after {
+			opacity: 1;
+			transition: opacity 150ms 200ms;
+		}
 	}
 }

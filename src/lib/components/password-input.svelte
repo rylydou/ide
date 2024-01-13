@@ -12,7 +12,10 @@
 		{...$$restProps}
 	/>
 
-	<Toggle bind:value={reveal_password} title={reveal_password ? 'Hide password' : 'Show password'}>
+	<Toggle
+		bind:value={reveal_password}
+		data-tooltip={reveal_password ? 'Hide password' : 'Show password'}
+	>
 		<div slot="on" class="icon-unlock" />
 		<div slot="off" class="icon-lock" />
 	</Toggle>
