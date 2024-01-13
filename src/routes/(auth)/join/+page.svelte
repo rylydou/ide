@@ -1,65 +1,54 @@
 <script lang="ts">
-	import { enhance } from '$app/forms'
-	import { debounce } from '$lib'
+	import { applyAction, enhance } from '$app/forms'
 
-	let secret_input = 'test'
-	let group_name = ''
+	let message = 'Test message'
 
-	let error_message = ''
-
-	const handle_group = () => {
-		group_name = secret_input
-	}
+	let is_waiting = false
+	let secret_input = ''
 </script>
 
-<main>
+<main class="layout-center">
 	<form
-		class="form center-form"
+		class="form center-form form"
 		method="POST"
 		use:enhance={() => {
+			is_waiting = true
+
 			return async ({ result }) => {
-				const is_ok = result.type == 'success' || result.type == 'redirect'
-				if (!is_ok) {
-					error_message =
-						// @ts-ignore
-						result?.data?.message || result?.error?.message || 'An unknown error occurred.'
-					return
+				console.log({ result })
+				is_waiting = false
+
+				switch (result.type) {
+					case 'redirect':
+					case 'success':
+						return await applyAction(result)
+					case 'failure':
+						message = result.data?.message?.toString() || 'Something went wrong'
+						return
+					case 'error':
+						message = result?.error?.toString() || 'An error occurred'
+						return
 				}
 			}
 		}}
 	>
 		<label>
-			<span>Secret Code</span>
+			<span>Secret class code</span>
 			<input
 				type="text"
+				class="password"
 				name="secret"
 				autocomplete="off"
 				bind:value={secret_input}
-				on:keyup={debounce(handle_group)}
 			/>
 		</label>
 
-		<label>
-			<span>Full name</span>
-			<input class="input" type="text" name="name" autocomplete="name" value="Ryly Dou" />
-		</label>
+		<button class="btn" type="submit" disabled={!secret_input || is_waiting}>Join</button>
 
-		<label>
-			<span>Password</span>
-			<input
-				type="password"
-				name="password"
-				autocomplete="new-password"
-				placeholder="shh... keep it a secret"
-				value="password"
-			/>
-		</label>
+		<span>Already joined a class? <a class="link" href="/login">Log in instead</a></span>
 
-		<button class="btn" type="submit" disabled={!group_name}>
-			Join
-			{#if group_name}
-				"{group_name}"
-			{/if}
-		</button>
+		<div class="message">
+			{message}
+		</div>
 	</form>
 </main>

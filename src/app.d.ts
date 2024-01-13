@@ -1,20 +1,20 @@
-// See https://kit.svelte.dev/docs/types#app
+import { AuthSession } from './lib/types/auth-session'
 
-import type { UserSession } from './routes/stores'
-
-// for information about these interfaces
 declare global {
 	namespace App {
 		interface Error {
-			message: string
+			message?: string
 		}
 		interface Locals {
-			user_session: UserSession
+			session?: AuthSession | null
 		}
-		// interface PageData {}
+		interface PageData {
+			session?: AuthSession | null
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}
 }
+
 
 export { }

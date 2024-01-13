@@ -1,32 +1,42 @@
 {
-	"name": "builder",
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"dev": "vite dev --host",
-		"generate": "drizzle-kit generate:pg",
-		"migrate": "bun scripts/migrate.ts",
-		"push": "drizzle-kit push:pg",
-		"hi": "bun scripts/hi.ts",
-		"preview": "vite preview --host",
-		"build": "vite build"
-	},
-	"devDependencies": {
-		"@sveltejs/adapter-auto": "^3",
-		"@sveltejs/kit": "^2",
-		"@sveltejs/vite-plugin-svelte": "^3",
-		"drizzle-kit": "^0.20",
-		"sass": "^1",
-		"svelte": "^4",
-		"tslib": "^2",
-		"typescript": "^5",
-		"vite": "^5"
-	},
-	"dependencies": {
-		"@neondatabase/serverless": "^0.7",
-		"dotenv": "^16",
-		"drizzle-orm": "^0.29",
-		"zod": "^3"
-	},
-	"type": "module"
+  "name": "builder",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev --host",
+    "generate": "drizzle-kit generate:pg",
+    "migrate": "bun scripts/migrate.ts",
+    "push": "drizzle-kit push:pg",
+    "hi": "bun scripts/hi.ts",
+    "preview": "vite preview --host",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@iconify/tools": "^4.0.0",
+    "@iconify/utils": "^2.1.14",
+    "@sveltejs/adapter-auto": "^3",
+    "@sveltejs/kit": "^2",
+    "@sveltejs/vite-plugin-svelte": "^3",
+    "@types/bcrypt": "^5.0.2",
+    "@unocss/extractor-svelte": "^0.58.3",
+    "drizzle-kit": "^0.20",
+    "pg": "^8.11.3",
+    "sass": "^1",
+    "svelte": "^4",
+    "tslib": "^2",
+    "typescript": "^5",
+    "vite": "^5"
+  },
+  "dependencies": {
+    "@auth/core": "^0.20.0",
+    "@auth/sveltekit": "^0.5.2",
+    "@neondatabase/serverless": "^0.7",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16",
+    "drizzle-orm": "^0.29",
+    "unocss": "^0.58.3",
+    "zod": "^3"
+  },
+  "type": "module"
 }

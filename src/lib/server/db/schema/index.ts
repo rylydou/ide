@@ -1,4 +1,4 @@
 export * from './group'
 export * from './project'
-export * from './token'
+export * from './session'
 export * from './user'

@@ -1,19 +1,12 @@
-import { relations } from 'drizzle-orm'
-import { pgTable, serial, text } from 'drizzle-orm/pg-core'
-import { user } from '.'
+import { integer, serial, text } from 'drizzle-orm/pg-core'
+import { table } from './table'
 
 
-export const group = pgTable('group', {
+export const group = table('group', {
 	id: serial('id').primaryKey(),
 	name: text('name').notNull(),
-	secret: text('secret').notNull(),
+	secret: text('secret').notNull().unique('group-secret'),
+
+	teacher_ids: integer('teacher_ids').array().notNull(),
+	student_ids: integer('student_ids').array().notNull(),
 })
-
-
-export const group_relations = relations(group, ({ many }) => ({
-	users: many(user),
-}))
-
-
-export type Group = typeof group.$inferSelect
-export type NewGroup = typeof group.$inferInsert

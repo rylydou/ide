@@ -1,8 +1,8 @@
-import { json, redirect } from '@sveltejs/kit'
-import type { Actions } from './$types'
+import { error, json, redirect } from '@sveltejs/kit'
+import type { Actions, PageServerLoad } from './$types'
 import { z } from 'zod'
 import { db, schema } from '$lib/server'
-import { eq } from 'drizzle-orm'
+import { eq, ilike } from 'drizzle-orm'
 import { nanoid } from '$lib'
 
 
@@ -14,8 +14,28 @@ export type FormResponse = {
 }
 
 
+export const load: PageServerLoad = async ({ locals, cookies }) => {
+	const join_secret = (cookies.get('join-secret') || '').trim()
+
+	const group = join_secret ? await db.query.group.findFirst({
+		where: ilike(schema.group.secret, join_secret),
+	}) : null
+
+	console.log(group)
+
+	if (!group) {
+		console.log('group not found, redirecting to join')
+		throw redirect(303, '/join')
+	}
+
+	return {
+		group,
+	}
+}
+
+
 export const actions: Actions = {
-	default: async ({ locals, request, cookies, }) => {
+	default: async ({ locals, request, cookies, url }) => {
 		const data_schema = z.object({
 			secret: z.string().min(4).toLowerCase(),
 			name: z.string().min(3),
@@ -23,7 +43,16 @@ export const actions: Actions = {
 		})
 
 		const form_data = Object.fromEntries(await request.formData())
-		const data = data_schema.parse(form_data)
+		const result = await data_schema.safeParseAsync({
+			...form_data,
+			secret: url.searchParams.get('secret')
+		})
+
+		if (!result.success) {
+			throw error(400, { message: 'Zod: ' + result.error.message })
+		}
+
+		const data = result.data
 
 		const group = db.query.group.findFirst({
 			where: eq(schema.group.secret, data.secret)

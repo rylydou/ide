@@ -1,18 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms'
-	import { debounce } from '$lib'
-
-	let secret_input = 'test'
-	let group_name = ''
+	import { PasswordInput } from '$lib/components'
 
 	let error_message = ''
-
-	const handle_group = () => {
-		group_name = secret_input
-	}
 </script>
 
-<main>
+<main class="layout-center">
 	<form
 		class="form center-form"
 		method="POST"
@@ -29,8 +22,8 @@
 		}}
 	>
 		<div class="tabs">
-			<a class="tab current" href="/register">Register</a>
-			<a class="tab">Register</a>
+			<a class="tab" href="/register" aria-current="location">Register</a>
+			<a class="tab" href="/login">Login</a>
 		</div>
 
 		<label>
@@ -40,20 +33,9 @@
 
 		<label>
 			<span>Password</span>
-			<input
-				type="password"
-				name="password"
-				autocomplete="new-password"
-				placeholder="shh... keep it a secret"
-				value="password"
-			/>
+			<PasswordInput name="password" autocomplete="new-password" value="password" />
 		</label>
 
-		<button class="btn" type="submit" disabled={!group_name}>
-			Join
-			{#if group_name}
-				"{group_name}"
-			{/if}
-		</button>
+		<button class="btn" type="submit"> Register </button>
 	</form>
 </main>
