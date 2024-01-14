@@ -1,9 +1,9 @@
-import { error, fail, json, redirect } from '@sveltejs/kit'
-import type { Actions, PageServerLoad } from './$types'
-import { z } from 'zod'
+import { ADMIN_SECRET } from '$env/static/private'
 import { db, encrypt, schema } from '$lib/server'
-import { eq, ilike } from 'drizzle-orm'
 import { grant_session, join_group } from '$lib/server/actions'
+import { fail, redirect } from '@sveltejs/kit'
+import { z } from 'zod'
+import type { Actions } from './$types'
 
 
 export const actions: Actions = {
@@ -20,19 +20,15 @@ export const actions: Actions = {
 
 		if (!result.success) {
 			return fail(400, {
-				message: result.error.message
+				message: result.error.message,
 			})
 		}
 
 		const data = result.data
 
-		const group = db.query.group.findFirst({
-			where: eq(schema.group.secret, data.secret)
-		})
-
-		if (!group) {
+		if (data.secret !== ADMIN_SECRET) {
 			return fail(401, {
-				message: 'Invalid secret code'
+				message: 'Invalid secret code',
 			})
 		}
 
@@ -41,11 +37,13 @@ export const actions: Actions = {
 			name: data.name,
 			email: data.email,
 			password: encrypted_password,
+			role: 'admin',
+			projects: [],
 		}).returning())[0]
 
-		grant_session(new_user.id, cookies)
-		join_group(data.secret, new_user.id)
-		cookies.delete('join-secret', { path: '/' })
+		cookies.delete('join_secret', { path: '/' })
+		await grant_session(new_user.id, cookies)
+		await join_group(data.secret, new_user.id)
 
 		throw redirect(303, '/')
 	},

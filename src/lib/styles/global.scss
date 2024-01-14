@@ -287,3 +287,20 @@ button {
 		}
 	}
 }
+
+
+.dash-layout {
+	display: flex;
+	flex-direction: column;
+
+	>header {
+		display: flex;
+		padding: 2rem;
+
+		h1 {
+			font-size: 1.5rem;
+			line-height: 1.5rem;
+			font-weight: bold;
+		}
+	}
+}

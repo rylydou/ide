@@ -7,7 +7,7 @@ import { grant_session, join_group } from '$lib/server/actions'
 
 
 export const load: PageServerLoad = async ({ cookies }) => {
-	const join_secret = (cookies.get('join-secret') || '').trim()
+	const join_secret = (cookies.get('join_secret') || '').trim()
 
 	const group = join_secret ? await db.query.group.findFirst({
 		where: ilike(schema.group.secret, join_secret),
@@ -45,7 +45,7 @@ export const actions: Actions = {
 
 		if (!result.success) {
 			return fail(400, {
-				message: result.error.message
+				message: result.error.message,
 			})
 		}
 
@@ -57,7 +57,7 @@ export const actions: Actions = {
 
 		if (!group) {
 			return fail(401, {
-				message: 'Invalid secret code'
+				message: 'Invalid secret code',
 			})
 		}
 
@@ -66,11 +66,12 @@ export const actions: Actions = {
 			name: data.name,
 			email: data.email,
 			password: encrypted_password,
+			projects: [],
 		}).returning())[0]
 
-		grant_session(new_user.id, cookies)
-		join_group(data.secret, new_user.id)
-		cookies.delete('join-secret', { path: '/' })
+		cookies.delete('join_secret', { path: '/' })
+		await grant_session(new_user.id, cookies)
+		await join_group(data.secret, new_user.id)
 
 		throw redirect(303, '/')
 	},

@@ -1,10 +1,9 @@
+import { cfg } from '$lib'
 import bcrypt from 'bcrypt'
 
 
 export const encrypt = async (plaintext: string) => {
-	const result = await bcrypt.hash(plaintext, 10)
-	console.log('encrypted:', result)
-	return result
+	return await bcrypt.hash(plaintext, cfg.encryption_salt_rounds)
 }
 
 

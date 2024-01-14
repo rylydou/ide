@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { applyAction, enhance } from '$app/forms'
-	import { cfg } from '$lib'
 	import { PasswordInput } from '$lib/components'
 
 	let message = ''
@@ -15,7 +14,6 @@
 			is_waiting = true
 
 			return async ({ result }) => {
-				console.log({ result })
 				is_waiting = false
 
 				switch (result.type) {

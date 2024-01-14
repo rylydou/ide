@@ -23,7 +23,6 @@ export const actions: Actions = {
 			password: z.string().min(8),
 		})
 
-
 		const form_data = Object.fromEntries(await request.formData())
 		const result = await data_schema.safeParseAsync({ ...form_data })
 
@@ -56,12 +55,12 @@ export const actions: Actions = {
 			})
 		}
 
-		grant_session(user.id, cookies)
+		await grant_session(user.id, cookies)
 
-		const secret = cookies.get('join-secret')
+		const secret = cookies.get('join_secret')
 		if (secret) {
-			join_group(secret, user.id)
-			cookies.delete('join-secret', { path: '/' })
+			cookies.delete('join_secret', { path: '/' })
+			await join_group(secret, user.id)
 		}
 
 		throw redirect(303, '/')

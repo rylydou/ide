@@ -15,7 +15,6 @@
 			is_waiting = true
 
 			return async ({ result }) => {
-				console.log({ result })
 				is_waiting = false
 
 				switch (result.type) {

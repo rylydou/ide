@@ -1,9 +1,8 @@
-import { fail, json, redirect } from '@sveltejs/kit'
-import type { Actions } from './$types'
-import { z } from 'zod'
 import { db, schema } from '$lib/server'
+import { fail, redirect } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
-import { ADMIN_SECRET } from '$env/static/private'
+import { z } from 'zod'
+import type { Actions } from './$types'
 
 
 export type FormResponse = {
@@ -25,28 +24,25 @@ export const actions: Actions = {
 
 		if (!result.success) {
 			return fail(400, {
-				message: 'Invalid schema format'
+				message: 'Invalid schema format',
 			})
 		}
 
 		const data = result.data
-
-		const is_admin = data.secret === ADMIN_SECRET
 
 		const group = await db.query.group.findFirst({
 			where: eq(schema.group.secret, data.secret),
 			columns: { id: true, }
 		})
 
-		if (!group && !is_admin) {
+		if (!group) {
 			return fail(401, {
-				message: 'Invalid secret code'
+				message: 'Invalid secret code',
 			})
 		}
 
 		if (!locals.session) {
-			console.log('redirecting to register')
-			cookies.set('join-secret', data.secret, {
+			cookies.set('join_secret', data.secret, {
 				path: '/',
 				secure: true,
 				sameSite: 'lax',
@@ -54,7 +50,6 @@ export const actions: Actions = {
 			throw redirect(303, `/register`)
 		}
 
-		console.log('redirecting to home')
 		throw redirect(303, '/')
 	},
 }

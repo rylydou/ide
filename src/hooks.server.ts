@@ -1,5 +1,5 @@
 import { db, schema } from '$lib/server'
-import { type Handle } from '@sveltejs/kit'
+import type { Handle } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
 
 
