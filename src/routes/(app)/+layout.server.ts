@@ -7,5 +7,8 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	if (!session?.user) {
 		throw redirect(303, '/join')
 	}
-	return { session, }
+
+	return {
+		session,
+	}
 }
