@@ -1,13 +1,12 @@
 import { db, schema } from '$lib/server'
-import { project_update_schema } from '$lib/server/db/schema'
 import { error, redirect, type Actions } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
+import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import type { PageServerLoad } from './$types'
-import { createInsertSchema } from 'drizzle-zod'
 
 
-export const load = (async ({ locals, params, }) => {
+export const load = (async ({ locals, params }) => {
 	if (!locals.session) throw redirect(303, '/login')
 	const { user } = locals.session
 

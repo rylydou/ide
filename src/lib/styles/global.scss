@@ -53,7 +53,6 @@ html {
 	--radius-lg: 12px;
 }
 
-@import './light';
 
 html {
 	user-select: none;
@@ -75,6 +74,12 @@ body {
 	display: flex;
 	flex-direction: column;
 	overflow-x: hidden;
+}
+
+
+::selection {
+	background-color: var(--clr-accent);
+	color: var(--clr-on-accent);
 }
 
 
@@ -106,6 +111,16 @@ button {
 }
 
 
+.btn-group {
+	display: flex;
+	gap: 1rem;
+
+	>* {
+		flex: 1;
+	}
+}
+
+
 .btn,
 .toggle {
 	--btn-bg: var(--clr-bg);
@@ -119,7 +134,7 @@ button {
 	align-items: center;
 	justify-content: center;
 	padding: 8px;
-	gap: 4px;
+	gap: 8px;
 	font-weight: bold;
 	border-radius: var(--radius);
 	background-color: var(--btn-bg);
@@ -510,5 +525,52 @@ button {
 
 	>* {
 		flex: 1;
+	}
+}
+
+
+.splitpanes__splitter {
+	position: relative;
+	background-color: var(--clr-base);
+
+	&::after {
+		content: '';
+		pointer-events: none;
+		position: absolute;
+		inset: 7px;
+		border-radius: var(--radius);
+		background-color: var(--clr-accent);
+		opacity: 0;
+	}
+
+	&:hover::after {
+		opacity: 1;
+		transition: opacity 150ms 300ms;
+	}
+}
+
+
+.splitpanes--vertical {
+	>.splitpanes__pane {
+		height: unset !important;
+		min-width: 10rem;
+	}
+
+	>.splitpanes__splitter {
+		cursor: col-resize;
+		width: 1rem;
+	}
+}
+
+
+.splitpanes--horizontal {
+	>.splitpanes__pane {
+		width: unset !important;
+		min-height: 2.5rem;
+	}
+
+	>.splitpanes__splitter {
+		cursor: row-resize;
+		height: 1rem;
 	}
 }

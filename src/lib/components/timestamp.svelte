@@ -1,9 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
-
 	export let date: Date
-	export let relative = false
-	export let update_delay_ms = 10_000
 
 	let str = ''
 	const intl = new Intl.RelativeTimeFormat(undefined, { style: 'long' })

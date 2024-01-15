@@ -4,6 +4,7 @@
 	import type { PageData } from './$types'
 	import { page } from '$app/stores'
 	import { crossfade } from 'svelte/transition'
+	import { quadInOut } from 'svelte/easing'
 
 	export let data: PageData
 
@@ -17,7 +18,7 @@
 			})
 		: data.projects
 
-	const [send, receive] = crossfade({ duration: 200 })
+	const [send, receive] = crossfade({ duration: 1000, easing: quadInOut })
 </script>
 
 <main class="dash-layout">
@@ -62,7 +63,7 @@
 		</header>
 		<div class="sec-content list-grid">
 			{#each filtered_projects as project (project.id)}
-				<ProjectCard {project} />
+				<ProjectCard {project} {send} {receive} />
 			{/each}
 		</div>
 	</section>
