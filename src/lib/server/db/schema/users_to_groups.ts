@@ -1,12 +1,12 @@
-import { integer, primaryKey } from 'drizzle-orm/pg-core'
-import { table } from './table'
-import { group, user } from '.'
 import { relations } from 'drizzle-orm'
+import { primaryKey } from 'drizzle-orm/pg-core'
+import { group, user } from '.'
+import { ref, table } from './shared'
 
 
 export const users_to_groups = table('users_to_groups', {
-	user_id: integer('user_id').notNull().references(() => user.id),
-	group_id: integer('group_id').notNull().references(() => group.id),
+	user_id: ref('user_id').notNull().references(() => user.id),
+	group_id: ref('group_id').notNull().references(() => group.id),
 }, (t) => ({
 	pk: primaryKey({ columns: [t.user_id, t.group_id] }),
 }),

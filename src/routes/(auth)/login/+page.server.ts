@@ -1,11 +1,10 @@
-import { fail, json, redirect } from '@sveltejs/kit'
-import type { Actions } from './$types'
-import { z } from 'zod'
-import { check, db, schema } from '$lib/server'
-import { eq } from 'drizzle-orm'
-import { nanoid } from '$lib/server'
-import { grant_session, join_group } from '$lib/server/actions'
 import { cfg } from '$lib'
+import { check, db, schema } from '$lib/server'
+import { grant_session, join_group } from '$lib/server/actions'
+import { fail, redirect } from '@sveltejs/kit'
+import { eq } from 'drizzle-orm'
+import { z } from 'zod'
+import type { Actions } from './$types'
 
 
 export type FormResponse = {
@@ -17,7 +16,7 @@ export type FormResponse = {
 
 
 export const actions: Actions = {
-	default: async ({ request, cookies, url }) => {
+	default: async ({ request, cookies }) => {
 		const data_schema = z.object({
 			email: z.string().trim().toLowerCase(),
 			password: z.string().min(8),

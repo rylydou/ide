@@ -1,12 +1,12 @@
 import { relations } from 'drizzle-orm'
-import { integer, text, timestamp } from 'drizzle-orm/pg-core'
-import { table } from './table'
+import { char, timestamp } from 'drizzle-orm/pg-core'
+import { ref, table } from './shared'
 import { user } from './user'
 
 
 export const session = table('session', {
-	token: text('token').notNull().primaryKey(),
-	user_id: integer('user_id').notNull().references(() => user.id, { onDelete: 'cascade', }),
+	token: char('token', { length: 30 }).notNull().primaryKey(),
+	user_id: ref('user_id').notNull().references(() => user.id, { onDelete: 'cascade', }),
 	expires: timestamp('expires', { mode: 'date' }).notNull(),
 })
 

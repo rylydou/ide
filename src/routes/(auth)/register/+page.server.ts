@@ -66,7 +66,6 @@ export const actions: Actions = {
 			name: data.name,
 			email: data.email,
 			password: encrypted_password,
-			projects: [],
 		}).returning())[0]
 
 		cookies.delete('join_secret', { path: '/' })

@@ -1,20 +1,12 @@
 <script lang="ts">
+	import { Timestamp } from '$lib/components'
 	import type { ProjectInfo } from '$lib/server/db/schema'
 
 	export let project: ProjectInfo
 </script>
 
-<div class="project-card">
+<article class="card project-card">
+	<a class="card-link" href={`/project/${project.id}`}>Open {project.name}</a>
 	<h3>{project.name}</h3>
-</div>
-
-<style lang="scss">
-	.project-card {
-		background-color: var(--clr-bg);
-		padding: 1rem;
-
-		> h3 {
-			font-weight: bold;
-		}
-	}
-</style>
+	<span>Updated <Timestamp date={project.updated_at} /></span>
+</article>

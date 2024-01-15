@@ -8,8 +8,8 @@ export const url_alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmn
 export const human_alphabet = '1234567890ABCDEFGHJKMNPQRTUVWXY'
 
 
-export const url_id = custom_alphabet(url_alphabet, 64)
-export const human_id = custom_alphabet(human_alphabet, 64)
+export const url_id = custom_alphabet(url_alphabet, 15)
+export const human_id = custom_alphabet(human_alphabet, 6)
 
 
 // It is best to make fewer, larger requests to the crypto module to

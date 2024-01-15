@@ -1,13 +1,15 @@
-import { integer, jsonb, serial, text, timestamp } from 'drizzle-orm/pg-core'
-import { table } from './table'
 import { relations } from 'drizzle-orm'
+import { jsonb, text, timestamp } from 'drizzle-orm/pg-core'
 import { user } from '.'
+import { id, ref, table } from './shared'
+import { createInsertSchema } from 'drizzle-zod'
+import { z } from 'zod'
 
 
 export const project = table('project', {
-	id: serial('id').primaryKey(),
+	id: id('id').primaryKey(),
 	name: text('name').default('Untitled Project').notNull(),
-	author_id: integer('author_id').notNull(),
+	author_id: ref('author_id').notNull().references(() => user.id, { onDelete: 'cascade', }),
 	created_at: timestamp('created_at').defaultNow().notNull(),
 	updated_at: timestamp('updated_at').defaultNow().notNull(),
 	data: jsonb('data'),
@@ -22,7 +24,7 @@ export const project_relations = relations(project, ({ one }) => ({
 export type ProjectInfo = {
 	id: number,
 	name: string,
-	author_id: number,
+	author_id?: number,
 	created_at: Date,
 	updated_at: Date,
 }

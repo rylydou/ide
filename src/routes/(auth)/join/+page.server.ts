@@ -1,4 +1,5 @@
 import { db, schema } from '$lib/server'
+import { join_group } from '$lib/server/actions'
 import { fail, redirect } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
@@ -14,7 +15,7 @@ export type FormResponse = {
 
 
 export const actions: Actions = {
-	default: async ({ locals, request, cookies, }) => {
+	default: async ({ request, locals, cookies }) => {
 		const form_schema = z.object({
 			secret: z.string().toLowerCase(),
 		})
@@ -41,7 +42,8 @@ export const actions: Actions = {
 			})
 		}
 
-		if (!locals.session) {
+		const session = locals.session
+		if (!session) {
 			cookies.set('join_secret', data.secret, {
 				path: '/',
 				secure: true,
@@ -50,6 +52,7 @@ export const actions: Actions = {
 			throw redirect(303, `/register`)
 		}
 
+		await join_group(data.secret, session.user.id)
 		throw redirect(303, '/')
 	},
 }

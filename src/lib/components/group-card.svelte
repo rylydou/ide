@@ -4,17 +4,7 @@
 	export let group: GroupInfo
 </script>
 
-<div class="group-card">
+<article class="card card-sm">
+	<a class="card-link" href={`/class/${group.id}`}>Go to {group.name}</a>
 	<h3>{group.name}</h3>
-</div>
-
-<style lang="scss">
-	.group-card {
-		background-color: var(--clr-bg);
-		padding: 1rem;
-
-		> h3 {
-			font-weight: bold;
-		}
-	}
-</style>
+</article>

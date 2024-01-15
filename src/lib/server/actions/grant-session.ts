@@ -1,15 +1,15 @@
+import { cfg, future_date } from '$lib'
 import type { Cookies } from '@sveltejs/kit'
-import { db, schema, url_id } from '..'
-import { cfg } from '$lib'
 import { eq } from 'drizzle-orm'
+import { db, schema, url_id } from '..'
 
 
 export const grant_session = async (user_id: number, cookies: Cookies) => {
-	const expires = new Date()
-	expires.setUTCDate(expires.getUTCDate() + cfg.session_max_age_days)
+	const now = new Date()
+
 	const new_session = (await db.insert(schema.session).values({
-		token: url_id(32),
-		expires,
+		token: url_id(30),
+		expires: future_date(cfg.session_max_age_days),
 		user_id,
 	}).returning())[0]
 
@@ -17,12 +17,16 @@ export const grant_session = async (user_id: number, cookies: Cookies) => {
 		where: eq(schema.session.user_id, user_id),
 		orderBy: (sessions, { asc }) => [asc(sessions.expires)],
 	})
-	console.log({ sessions: sessions_oldest_to_newest })
 
+	for (const session of sessions_oldest_to_newest) {
+		if (session.expires < now)
+			await db.delete(schema.session).where(eq(schema.session.token, session.token))
+	}
+
+	// delete extra sessions
 	while (sessions_oldest_to_newest.length > cfg.max_sessions_per_user) {
 		const session = sessions_oldest_to_newest.shift()
 		if (!session) break
-		console.log('too many sessions, deleting oldest session')
 		await db.delete(schema.session).where(eq(schema.session.token, session.token))
 	}
 

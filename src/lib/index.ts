@@ -1,3 +1,6 @@
+export * from './array'
 export * as cfg from './config'
+export * from './date'
 export * from './debounce'
 export * from './greeting'
+export * as rand from './rand'

@@ -1,40 +1,41 @@
 {
-	"name": "builder",
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"web:build": "vite build",
-		"web:preview": "vite preview --host",
-		"web:dev": "vite dev --host",
-		"db:migrate": "bun scripts/migrate.ts",
-		"db:studio": "drizzle-kit studio",
-		"db:generate": "drizzle-kit generate:pg",
-		"db:push": "drizzle-kit push:pg",
-		"vercel:pull": "vercel env pull .env"
-	},
-	"devDependencies": {
-		"@iconify/tools": "^4",
-		"@iconify/utils": "^2",
-		"@sveltejs/adapter-auto": "^3",
-		"@sveltejs/kit": "^2",
-		"@sveltejs/vite-plugin-svelte": "^3",
-		"@types/bcrypt": "5.0.2",
-		"@unocss/extractor-svelte": "^0.58",
-		"drizzle-kit": "^0.20",
-		"pg": "^8",
-		"sass": "^1",
-		"svelte": "^4",
-		"tslib": "^2",
-		"typescript": "^5",
-		"vite": "^5"
-	},
-	"dependencies": {
-		"@neondatabase/serverless": "^0.7",
-		"bcrypt": "5.1.1",
-		"dotenv": "^16",
-		"drizzle-orm": "^0.29",
-		"unocss": "^0.58",
-		"zod": "^3"
-	},
-	"type": "module"
+  "name": "builder",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "web:build": "vite build",
+    "web:preview": "vite preview --host",
+    "web:dev": "vite dev --host",
+    "db:migrate": "bun scripts/migrate.ts",
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate:pg",
+    "db:push": "drizzle-kit push:pg",
+    "vercel:pull": "vercel env pull .env"
+  },
+  "devDependencies": {
+    "@iconify/tools": "^4",
+    "@iconify/utils": "^2",
+    "@sveltejs/adapter-auto": "^3",
+    "@sveltejs/kit": "^2",
+    "@sveltejs/vite-plugin-svelte": "^3",
+    "@types/bcrypt": "5.0.2",
+    "@unocss/extractor-svelte": "^0.58",
+    "drizzle-kit": "^0.20",
+    "pg": "^8",
+    "sass": "^1",
+    "svelte": "^4",
+    "tslib": "^2",
+    "typescript": "^5",
+    "vite": "^5"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.7",
+    "bcrypt": "5.1.1",
+    "dotenv": "^16",
+    "drizzle-orm": "^0.29",
+    "drizzle-zod": "^0.5.1",
+    "unocss": "^0.58",
+    "zod": "^3"
+  },
+  "type": "module"
 }
