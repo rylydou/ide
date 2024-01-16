@@ -543,6 +543,7 @@ button {
 		opacity: 0;
 	}
 
+	&.splitpanes__splitter__active::after,
 	&:hover::after {
 		opacity: 1;
 		transition: opacity 150ms 300ms;

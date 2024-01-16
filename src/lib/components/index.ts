@@ -1,3 +1,4 @@
+export { default as CodeEditor } from './code-editor.svelte'
 export { default as GroupCard } from './group-card.svelte'
 export { default as PasswordInput } from './password-input.svelte'
 export { default as ProjectCard } from './project-card.svelte'

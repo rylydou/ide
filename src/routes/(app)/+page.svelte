@@ -3,8 +3,9 @@
 	import { GroupCard, ProjectCard, SearchInput } from '$lib/components'
 	import type { PageData } from './$types'
 	import { page } from '$app/stores'
-	import { crossfade } from 'svelte/transition'
-	import { quadInOut } from 'svelte/easing'
+	import { crossfade, scale } from 'svelte/transition'
+	import { expoOut as easing } from 'svelte/easing'
+	import { flip } from 'svelte/animate'
 
 	export let data: PageData
 
@@ -18,7 +19,11 @@
 			})
 		: data.projects
 
-	const [send, receive] = crossfade({ duration: 1000, easing: quadInOut })
+	const [send, receive] = crossfade({
+		duration: 200,
+		easing,
+		fallback: (node) => scale(node, { duration: 200 }),
+	})
 </script>
 
 <main class="dash-layout">
@@ -61,10 +66,18 @@
 				>
 			</div>
 		</header>
-		<div class="sec-content list-grid">
+		<ul class="sec-content list-grid">
 			{#each filtered_projects as project (project.id)}
-				<ProjectCard {project} {send} {receive} />
+				<li
+					animate:flip={{ duration: 200, easing }}
+					out:send={{ key: project.id }}
+					in:receive={{ key: project.id }}
+				>
+					<ProjectCard {project} />
+				</li>
+			{:else}
+				<li>{projects_filter ? 'No results' : 'Get started by clicking "New Project"'}</li>
 			{/each}
-		</div>
+		</ul>
 	</section>
 </main>

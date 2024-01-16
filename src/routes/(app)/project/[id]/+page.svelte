@@ -1,14 +1,21 @@
 <script lang="ts">
-	import { Timestamp } from '$lib/components'
+	import { CodeEditor, Timestamp } from '$lib/components'
 	import { auto_size } from '$lib/directives'
-	import type { PageData } from './$types'
 	import { Pane, Splitpanes } from 'svelte-splitpanes'
+	import type { PageData } from './$types'
+	import { onMount } from 'svelte'
 
 	export let data: PageData
 
 	let { is_author, project, session } = data
 	let has_edited = false
-	let is_dirty = true
+	let is_dirty = false
+
+	let html_code = '<h1 class="hi">Hello World</h1>'
+
+	onMount(() => {
+		html_code = document.body.innerHTML
+	})
 </script>
 
 <svelte:head>
@@ -19,7 +26,9 @@
 	<header>
 		<div>
 			<a class="btn btn-text" href="/"> <div class="icon-double-left"></div> Back</a>
-			<button class="btn btn-text"><div class="icon-trash"></div> Delete</button>
+			{#if is_author}
+				<button class="btn btn-text"><div class="icon-trash"></div> Delete</button>
+			{/if}
 		</div>
 
 		<div>
@@ -55,13 +64,23 @@
 			<Splitpanes class="code-editors" theme="" horizontal>
 				<Pane>
 					<div class="panel">
-						<div class="panel-header">HTML</div>
-						<div class="panel-content"></div>
+						<div class="panel-header">
+							<div class="panel-header">
+								<div class="panel-header-title">HTML</div>
+								<div class="panel-header-content"></div>
+							</div>
+						</div>
+						<div class="panel-content">
+							<CodeEditor code={html_code} lang="html" />
+						</div>
 					</div>
 				</Pane>
 				<Pane>
 					<div class="panel">
-						<div class="panel-header">CSS</div>
+						<div class="panel-header">
+							<div class="panel-header-title">CSS</div>
+							<div class="panel-header-content"></div>
+						</div>
 						<div class="panel-content"></div>
 					</div>
 				</Pane>
@@ -69,7 +88,10 @@
 		</Pane>
 		<Pane class="browser">
 			<div class="panel">
-				<div class="panel-header">Browser</div>
+				<div class="panel-header">
+					<div class="panel-header-title">Browser</div>
+					<div class="panel-header-content"></div>
+				</div>
 				<div class="panel-content"></div>
 			</div>
 		</Pane>
@@ -126,7 +148,7 @@
 					transition: margin-right 600ms cubic-bezier(0.16, 1, 0.3, 1);
 
 					&.hidden {
-						margin-right: -6rem;
+						margin-right: -7rem;
 						transition: margin-right 200ms ease-in-out;
 					}
 				}
@@ -137,15 +159,36 @@
 	.panel {
 		width: 100%;
 		height: 100%;
-		border-radius: var(--radius);
-		background-color: var(--clr-bg);
+		display: grid;
+		grid-template-rows: 2.5rem auto;
 	}
 
 	.panel-header {
-		min-height: 2.5rem;
+		display: flex;
+	}
+
+	.panel-header-title {
 		display: flex;
 		align-items: center;
-		padding-inline: 1rem;
+		padding-inline: 1.5rem;
 		font-weight: bold;
+		border-top-left-radius: var(--radius-lg);
+		border-top-right-radius: var(--radius-lg);
+		background-color: var(--clr-bg);
+	}
+
+	.panel-header-content {
+		display: flex;
+		justify-content: end;
+		align-items: center;
+	}
+
+	.panel-content {
+		border-radius: var(--radius-lg);
+		border-top-left-radius: 0;
+		background-color: var(--clr-bg);
+
+		min-height: 0;
+		max-height: 100%;
 	}
 </style>
