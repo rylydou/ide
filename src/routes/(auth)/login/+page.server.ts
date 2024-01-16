@@ -18,8 +18,8 @@ export type FormResponse = {
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const data_schema = z.object({
-			email: z.string().trim().toLowerCase(),
-			password: z.string().min(8),
+			email: z.string().trim().min(1, 'An email is required').toLowerCase(),
+			password: z.string().min(8, 'Password must be at least 8 characters long'),
 		})
 
 		const form_data = Object.fromEntries(await request.formData())
@@ -27,7 +27,8 @@ export const actions: Actions = {
 
 		if (!result.success) {
 			return fail(400, {
-				message: result.error.message,
+				message: result.error.errors[0].message,
+				// message: result.error.errors.map(({ message }) => message).join('\n'),
 			})
 		}
 
