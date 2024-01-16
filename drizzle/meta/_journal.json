@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1705176814571,
-      "tag": "0000_worthless_rhino",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1705178238040,
-      "tag": "0001_nice_ikaris",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1705206052136,
-      "tag": "0002_illegal_callisto",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1705253598964,
-      "tag": "0003_gorgeous_mariko_yashida",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1705253910765,
-      "tag": "0004_sour_tag",
+      "when": 1705373353763,
+      "tag": "0000_freezing_energizer",
       "breakpoints": true
     }
   ]

@@ -9,7 +9,7 @@
 
 	let { is_author, project, session } = data
 	let has_edited = false
-	let is_dirty = false
+	let is_dirty = true
 
 	let html_code = '<h1 class="hi">Hello World</h1>'
 
@@ -35,7 +35,9 @@
 			<input
 				type="text"
 				class="project-name input input-flat"
-				placeholder="Unnamed"
+				placeholder="Untitled Project"
+				autocomplete="off"
+				spellcheck="false"
 				bind:value={data.project.name}
 				use:auto_size
 			/>
@@ -131,9 +133,12 @@
 					padding: 0.5rem;
 					font-weight: bold;
 					font-size: 1.25rem;
-					min-width: 7rem;
 					margin-right: 8px;
 					transition: margin-right 200ms ease-in-out;
+
+					&:placeholder-shown {
+						min-width: 10rem;
+					}
 				}
 			}
 
@@ -142,10 +147,11 @@
 				gap: 1rem;
 
 				> .btn-save {
-					min-width: 5rem;
 					margin-left: 1rem;
 					margin-right: 0;
 					transition: margin-right 600ms cubic-bezier(0.16, 1, 0.3, 1);
+
+					min-width: 5rem;
 
 					&.hidden {
 						margin-right: -7rem;

@@ -6,10 +6,10 @@ dotenv.config()
 export default {
 	schema: 'src/lib/server/db/schema/*',
 	out: './drizzle',
-	driver: 'pg',
+	driver: 'turso',
 	dbCredentials: {
-		connectionString: process.env.DATABASE_URL! + '?sslmode=require',
-		ssl: true,
+		url: process.env.DB_URL!,
+		authToken: process.env.DB_TOKEN!,
 	},
 	tablesFilter: ['builder_'],
 } satisfies Config

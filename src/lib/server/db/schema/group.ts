@@ -1,13 +1,12 @@
 import { relations } from 'drizzle-orm'
-import { text } from 'drizzle-orm/pg-core'
 import { users_to_groups } from '.'
-import { id, table } from './shared'
+import { id, str, table } from './shared'
 
 
 export const group = table('group', {
-	id: id('id').primaryKey(),
-	name: text('name').notNull(),
-	secret: text('secret').unique('group-secret', { nulls: 'distinct' }),
+	id: id('id'),
+	name: str('name').notNull(),
+	secret: str('secret').unique('group-secret'),
 })
 
 

@@ -1,123 +1,136 @@
 {
-  "id": "a8316b9a-e2e2-426a-8406-1734ce6d45d9",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
-  "dialect": "pg",
+  "dialect": "sqlite",
+  "id": "e81e0897-fbc5-4e73-8253-e340810f2929",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "group": {
       "name": "group",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "integer",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": true
         },
         "name": {
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "secret": {
           "name": "secret",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
-        },
-        "user_ids": {
-          "name": "user_ids",
-          "type": "integer[]",
-          "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
+      "indexes": {
         "group-secret": {
           "name": "group-secret",
-          "nullsNotDistinct": false,
           "columns": [
             "secret"
-          ]
+          ],
+          "isUnique": true
         }
-      }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "project": {
       "name": "project",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "integer",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": true
         },
         "name": {
           "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'Untitled Project'"
+        },
+        "author_id": {
+          "name": "author_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false
         },
-        "code_html": {
-          "name": "code_html",
+        "data": {
+          "name": "data",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "''"
-        },
-        "code_css": {
-          "name": "code_css",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "project_author_id_user_id_fk": {
+          "name": "project_author_id_user_id_fk",
+          "tableFrom": "project",
+          "tableTo": "user",
+          "columnsFrom": [
+            "author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "session": {
       "name": "session",
-      "schema": "",
       "columns": {
         "token": {
           "name": "token",
-          "type": "text",
+          "type": "text(30)",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "user_id": {
           "name": "user_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "expires": {
           "name": "expires",
-          "type": "timestamp",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         }
       },
       "indexes": {},
@@ -126,7 +139,6 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "schemaTo": "public",
           "columnsFrom": [
             "user_id"
           ],
@@ -142,67 +154,119 @@
     },
     "user": {
       "name": "user",
-      "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "serial",
+          "type": "integer",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "name": {
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "password": {
           "name": "password",
-          "type": "text",
+          "type": "text(60)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "autoincrement": false
         },
         "role": {
           "name": "role",
-          "type": "user_role",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false,
           "default": "'student'"
-        },
-        "projects": {
-          "name": "projects",
-          "type": "integer[]",
-          "primaryKey": false,
-          "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
+    },
+    "users_to_groups": {
+      "name": "users_to_groups",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "group_id": {
+          "name": "group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "users_to_groups_user_id_user_id_fk": {
+          "name": "users_to_groups_user_id_user_id_fk",
+          "tableFrom": "users_to_groups",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "users_to_groups_group_id_group_id_fk": {
+          "name": "users_to_groups_group_id_group_id_fk",
+          "tableFrom": "users_to_groups",
+          "tableTo": "group",
+          "columnsFrom": [
+            "group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "users_to_groups_user_id_group_id_pk": {
+          "columns": [
+            "group_id",
+            "user_id"
+          ],
+          "name": "users_to_groups_user_id_group_id_pk"
+        }
+      },
+      "uniqueConstraints": {}
     }
   },
-  "enums": {
-    "user_role": {
-      "name": "user_role",
-      "values": {
-        "student": "student",
-        "admin": "admin",
-        "teacher": "teacher"
-      }
-    }
-  },
-  "schemas": {},
+  "enums": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
+    "tables": {},
+    "columns": {}
   }
 }

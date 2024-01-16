@@ -1,19 +1,15 @@
 import { relations } from 'drizzle-orm'
-import { char, pgEnum, text, timestamp } from 'drizzle-orm/pg-core'
 import { project, session, users_to_groups } from '.'
-import { id, table } from './shared'
-
-
-export const user_role = pgEnum('user_role', ['student', 'admin', 'teacher'])
+import { id, table, str, timestamp } from './shared'
 
 
 export const user = table('user', {
 	id: id('id').primaryKey(),
-	email: text('email').notNull(),
-	name: text('name').notNull(),
-	password: char('password', { length: 60 }).notNull(),
-	created_at: timestamp('created_at').defaultNow().notNull(),
-	role: user_role('role').default('student').notNull(),
+	email: str('email').notNull(),
+	name: str('name').notNull(),
+	password: str('password', { length: 60 }).notNull(),
+	created_at: timestamp('created_at').notNull(),
+	role: str('role', { enum: ['student', 'admin'] }).default('student').notNull(),
 })
 
 

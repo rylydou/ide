@@ -1,18 +1,15 @@
 import { relations } from 'drizzle-orm'
-import { jsonb, text, timestamp } from 'drizzle-orm/pg-core'
 import { user } from '.'
-import { id, ref, table } from './shared'
-import { createInsertSchema } from 'drizzle-zod'
-import { z } from 'zod'
+import { id, json, ref, str, table, timestamp } from './shared'
 
 
 export const project = table('project', {
-	id: id('id').primaryKey(),
-	name: text('name').default('Untitled Project').notNull(),
+	id: id('id'),
+	name: str('name').default('Untitled Project').notNull(),
 	author_id: ref('author_id').notNull().references(() => user.id, { onDelete: 'cascade', }),
-	created_at: timestamp('created_at').defaultNow().notNull(),
-	updated_at: timestamp('updated_at').defaultNow().notNull(),
-	data: jsonb('data'),
+	created_at: timestamp('created_at').notNull(),
+	updated_at: timestamp('updated_at').notNull(),
+	data: json('data'),
 })
 
 

@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { primaryKey } from 'drizzle-orm/pg-core'
+import { primaryKey } from 'drizzle-orm/sqlite-core'
 import { group, user } from '.'
 import { ref, table } from './shared'
 

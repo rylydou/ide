@@ -1,16 +1,12 @@
-import { drizzle } from "drizzle-orm/neon-serverless"
-import { migrate } from "drizzle-orm/neon-serverless/migrator"
-import { Pool } from '@neondatabase/serverless'
 import dotenv from 'dotenv'
+import { drizzle, } from "drizzle-orm/libsql"
+import { migrate } from "drizzle-orm/libsql/migrator"
+import { db_client } from '../src/lib/server/db/db_client'
 dotenv.config()
 
 
-const db_url = process.env.DATABASE_URL!
-console.log('connecting pool to', db_url)
-const pool = new Pool({ connectionString: process.env.NEON_DB_URL, max: 1, })
-
 console.log('connecting drizzle orm...')
-const db = drizzle(pool)
+const db = drizzle(db_client)
 
 console.log('migrating... (wish me luck)')
 await migrate(db, { migrationsFolder: 'drizzle', })

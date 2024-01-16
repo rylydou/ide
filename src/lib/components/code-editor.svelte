@@ -67,7 +67,6 @@
 			wrapLineLength: 100,
 			wrapAttributes: 'auto',
 		})
-		monaco.languages.typescript.
 	})
 </script>
 
