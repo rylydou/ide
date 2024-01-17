@@ -1,21 +1,22 @@
 <script lang="ts">
+	import { browser } from '$app/environment'
+	import { beforeNavigate } from '$app/navigation'
+	import { load_project, type ProjectData } from '$lib'
 	import { CodeEditor, Embed, Timestamp } from '$lib/components'
 	import { auto_size } from '$lib/directives'
+	import type { editor } from 'monaco-editor'
+	import { onDestroy, onMount } from 'svelte'
 	import { Pane, Splitpanes } from 'svelte-splitpanes'
 	import type { PageData } from './$types'
-	import { onMount, onDestroy } from 'svelte'
-	import { beforeNavigate } from '$app/navigation'
-	import { browser } from '$app/environment'
-	import type { editor } from 'monaco-editor'
 
 	export let data: PageData
 
-	let { is_author, project, session } = data
+	let { is_author, project } = data
 	let has_edited = false
 	$: is_dirty = html_dirty || css_dirty
 
-	let html_code = '<!-- Write your Markup here -->\n'
-	let css_code = '/* Write your Styles here */\n'
+	let html_code = '<!-- Loading... -->'
+	let css_code = '/* Loading... */'
 
 	let html_editor: editor.IStandaloneCodeEditor
 	let css_editor: editor.IStandaloneCodeEditor
@@ -28,8 +29,12 @@
 		ev.preventDefault()
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		window.addEventListener('beforeunload', before_unload)
+
+		const data = await load_project(project.data)
+		html_code = data.html_code
+		css_code = data.css_code
 		update_head()
 		update_body()
 	})
