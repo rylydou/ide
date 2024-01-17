@@ -49,7 +49,7 @@ export const actions: Actions = {
 		}
 
 		const valid_password = await check(data.password, user.password)
-		if (valid_password) {
+		if (!valid_password) {
 			return fail(401, {
 				message: 'Invalid email and/or password',
 			})

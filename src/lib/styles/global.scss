@@ -575,3 +575,15 @@ button {
 		height: 1rem;
 	}
 }
+
+
+.splitpanes__pane {
+	overflow: unset !important;
+}
+
+
+.monaco-editor,
+.monaco-editor-background,
+.monaco-editor .margin {
+	background: unset !important;
+}

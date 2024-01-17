@@ -35,6 +35,7 @@ export const monaco_theme: editor.IStandaloneThemeData = {
 		{
 			token: 'keyword',
 			foreground: '#e6482e',
+			fontStyle: 'italic',
 		},
 		{
 			token: 'number',
@@ -104,6 +105,55 @@ export const monaco_theme: editor.IStandaloneThemeData = {
 		'list.inactiveSelectionBackground': '#302c2e',
 		'list.inactiveSelectionForeground': '#cfc6b8',
 		'list.inactiveSelectionIconForeground': '#a0938e',
-		'scrollbar.shadow': '#302c2e'
+		'scrollbar.shadow': '#302c2e',
 	},
+}
+
+
+export const monaco_options: editor.IStandaloneEditorConstructionOptions = {
+	theme: 'zuhgy-dark',
+	automaticLayout: true,
+	minimap: {
+		enabled: false,
+	},
+	bracketPairColorization: {
+		enabled: true,
+	},
+	fontFamily: 'JetBrains Mono',
+	fontSize: 16,
+	fontLigatures: false,
+	cursorBlinking: 'phase',
+	cursorSmoothCaretAnimation: 'on',
+	renderWhitespace: 'boundary',
+	insertSpaces: false,
+	tabSize: 2,
+	lineNumbers: 'off',
+	glyphMargin: false,
+	folding: false,
+	overviewRulerLanes: 0,
+	scrollbar: {
+		vertical: 'hidden',
+		horizontal: 'hidden',
+	},
+	padding: {
+		top: 10,
+		bottom: 10,
+	},
+	renderLineHighlight: 'none',
+	colorDecorators: true,
+	defaultColorDecorators: true,
+	mouseWheelZoom: true,
+	suggestFontSize: 16,
+	suggestLineHeight: 28,
+	wordBasedSuggestions: 'off',
+	suggest: {
+		preview: true,
+		showWords: false,
+		showStatusBar: true,
+	},
+	smoothScrolling: true,
+	guides: {
+		indentation: false,
+	},
+	wordWrap: 'on',
 }

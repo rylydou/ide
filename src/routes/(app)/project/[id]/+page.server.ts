@@ -1,4 +1,4 @@
-import { db, schema } from '$lib/server'
+import { db, is_users_mutuals, schema } from '$lib/server'
 import { error, redirect, type Actions } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
 import { createInsertSchema } from 'drizzle-zod'
@@ -37,18 +37,7 @@ export const load = (async ({ locals, params }) => {
 	}
 	else {
 		// If the user is not the author then they can only view projects by users in the same groups as them
-		const user_groups = (await db.query.users_to_groups.findMany({
-			where: eq(schema.users_to_groups.user_id, user.id),
-			columns: { group_id: true, },
-		})).map(({ group_id }) => group_id)
-
-		const author_groups = (await db.query.users_to_groups.findMany({
-			where: eq(schema.users_to_groups.user_id, project.author_id),
-			columns: { group_id: true, },
-		})).map(({ group_id }) => group_id)
-
-		const share_groups = user_groups.some((g) => author_groups.includes(g))
-		if (!share_groups) throw error(404)
+		await is_users_mutuals(user.id, project.author_id)
 	}
 
 	return {
@@ -68,7 +57,7 @@ const project_update_schema = createInsertSchema(schema.project, {
 
 
 export const actions = {
-	update: async ({ request, locals, params, }) => {
+	save: async ({ request, locals, params, }) => {
 		if (!locals.session) throw error(401)
 		const { user } = locals.session
 

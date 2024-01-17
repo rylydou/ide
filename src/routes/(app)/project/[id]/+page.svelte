@@ -1,21 +1,67 @@
 <script lang="ts">
-	import { CodeEditor, Timestamp } from '$lib/components'
+	import { CodeEditor, Embed, Timestamp } from '$lib/components'
 	import { auto_size } from '$lib/directives'
 	import { Pane, Splitpanes } from 'svelte-splitpanes'
 	import type { PageData } from './$types'
-	import { onMount } from 'svelte'
+	import { onMount, onDestroy } from 'svelte'
+	import { beforeNavigate } from '$app/navigation'
+	import { browser } from '$app/environment'
+	import type { editor } from 'monaco-editor'
 
 	export let data: PageData
 
 	let { is_author, project, session } = data
 	let has_edited = false
-	let is_dirty = true
+	$: is_dirty = html_dirty || css_dirty
 
-	let html_code = '<h1 class="hi">Hello World</h1>'
+	let html_code = '<!-- Write your Markup here -->\n'
+	let css_code = '/* Write your Styles here */\n'
+
+	let html_editor: editor.IStandaloneCodeEditor
+	let css_editor: editor.IStandaloneCodeEditor
+
+	let html_dirty = false
+	let css_dirty = false
+
+	const before_unload = (ev: BeforeUnloadEvent) => {
+		if (!is_dirty) return
+		ev.preventDefault()
+	}
 
 	onMount(() => {
-		html_code = document.body.innerHTML
+		window.addEventListener('beforeunload', before_unload)
+		update_head()
+		update_body()
 	})
+
+	onDestroy(() => {
+		if (browser) {
+			window.removeEventListener('beforeunload', before_unload)
+		}
+	})
+
+	beforeNavigate(({ cancel }) => {
+		if (!is_dirty) return
+		if (!confirm('Are you sure you want to leave? All unsaved changes will be lost.')) {
+			cancel()
+		}
+	})
+
+	let body = ''
+	const update_body = () => {
+		if (html_editor) {
+			html_code = html_editor.getValue()
+		}
+		body = html_code
+	}
+
+	let head = ''
+	const update_head = () => {
+		if (css_editor) {
+			css_code = css_editor.getValue()
+		}
+		head = `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${css_code}</style>`
+	}
 </script>
 
 <svelte:head>
@@ -49,7 +95,7 @@
 				{has_edited ? 'Last saved' : 'Last updated'}
 				<Timestamp date={data.project.updated_at} />
 			</span>
-			<button class="btn btn-text btn-save btn-accent" class:hidden={!is_dirty && is_author}>
+			<button class="btn btn-text btn-save btn-accent" disabled={!is_dirty && is_author}>
 				{#if is_author}
 					<div class="icon-upload"></div>
 					Save
@@ -73,7 +119,13 @@
 							</div>
 						</div>
 						<div class="panel-content">
-							<CodeEditor code={html_code} lang="html" />
+							<CodeEditor
+								bind:editor={html_editor}
+								bind:is_dirty={html_dirty}
+								on:changed={update_body}
+								code={html_code}
+								lang="html"
+							/>
 						</div>
 					</div>
 				</Pane>
@@ -83,7 +135,15 @@
 							<div class="panel-header-title">CSS</div>
 							<div class="panel-header-content"></div>
 						</div>
-						<div class="panel-content"></div>
+						<div class="panel-content">
+							<CodeEditor
+								bind:editor={css_editor}
+								bind:is_dirty={css_dirty}
+								on:changed={update_head}
+								code={css_code}
+								lang="css"
+							/>
+						</div>
 					</div>
 				</Pane>
 			</Splitpanes>
@@ -94,13 +154,24 @@
 					<div class="panel-header-title">Browser</div>
 					<div class="panel-header-content"></div>
 				</div>
-				<div class="panel-content"></div>
+				<div class="panel-content">
+					<Embed
+						bind:head
+						bind:body
+						title={`Browser preview of "${project.name}" by ${project.author.name}`}
+						style="width: 100%; height: 100%; background-color: white;"
+					/>
+				</div>
 			</div>
 		</Pane>
 	</Splitpanes>
 </div>
 
 <style lang="scss">
+	:global(body) {
+		max-height: 100vh;
+	}
+
 	.project-layout {
 		flex: 1;
 		display: flex;
@@ -134,10 +205,9 @@
 					font-weight: bold;
 					font-size: 1.25rem;
 					margin-right: 8px;
-					transition: margin-right 200ms ease-in-out;
 
 					&:placeholder-shown {
-						min-width: 10rem;
+						min-width: 10.5rem;
 					}
 				}
 			}
@@ -153,7 +223,7 @@
 
 					min-width: 5rem;
 
-					&.hidden {
+					&:disabled {
 						margin-right: -7rem;
 						transition: margin-right 200ms ease-in-out;
 					}
