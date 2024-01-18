@@ -184,6 +184,12 @@ button {
 		outline-color: var(--clr-accent-hover);
 		outline-offset: 2px;
 	}
+
+	&.btn-destructive {
+		--btn-bg: var(--clr-red);
+		--btn-bg-hover: var(--clr-red);
+		--btn-fg: var(--clr-on-accent);
+	}
 }
 
 

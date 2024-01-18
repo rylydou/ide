@@ -10,12 +10,13 @@
 
 	$: {
 		const now = new Date()
-		const delta = Math.floor((date.getTime() - now.getTime()) / 1000)
+		const delta_ms = date.getTime() - now.getTime()
+		const delta = Math.floor(delta_ms / 1000)
 		const abs = Math.abs(delta)
 
 		if (abs < 60) {
-			str = intl.format(delta, 'second')
-			setTimeout(update, 10_000)
+			str = 'just now'
+			setTimeout(update, delta_ms)
 		} else if (abs < 60 * 60) {
 			str = intl.format(Math.floor(delta / 60), 'minute')
 			setTimeout(update, 60_000)

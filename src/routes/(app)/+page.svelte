@@ -73,7 +73,7 @@
 					out:send={{ key: project.id }}
 					in:receive={{ key: project.id }}
 				>
-					<ProjectCard {...project} />
+					<ProjectCard {project} />
 				</li>
 			{:else}
 				<li>{projects_filter ? 'No results' : 'Get started by clicking "New Project"'}</li>

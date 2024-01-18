@@ -21,6 +21,14 @@ export const monaco_theme: editor.IStandaloneThemeData = {
 			foreground: '#e6482e',
 		},
 		{
+			token: 'metatag.html',
+			foreground: '#7d7071',
+		},
+		{
+			token: 'metatag.content.html',
+			foreground: '#7d7071',
+		},
+		{
 			token: 'delimiter',
 			foreground: '#7d7071',
 		},
@@ -134,6 +142,7 @@ export const monaco_options: editor.IStandaloneEditorConstructionOptions = {
 	scrollbar: {
 		vertical: 'hidden',
 		horizontal: 'hidden',
+		useShadows: false,
 	},
 	padding: {
 		top: 10,

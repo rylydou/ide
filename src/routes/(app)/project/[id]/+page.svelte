@@ -1,46 +1,48 @@
 <script lang="ts">
-	import { browser } from '$app/environment'
-	import { beforeNavigate } from '$app/navigation'
-	import { load_project, type ProjectData } from '$lib'
+	import { beforeNavigate, goto } from '$app/navigation'
+	import { load_project } from '$lib'
 	import { CodeEditor, Embed, Timestamp } from '$lib/components'
 	import { auto_size } from '$lib/directives'
+	import reset_css from '$lib/styles/reset.css?inline'
 	import type { editor } from 'monaco-editor'
-	import { onDestroy, onMount } from 'svelte'
+	import { onMount } from 'svelte'
 	import { Pane, Splitpanes } from 'svelte-splitpanes'
 	import type { PageData } from './$types'
 
 	export let data: PageData
 
-	let { is_author, project } = data
-	let has_edited = false
-	$: is_dirty = html_dirty || css_dirty
-
+	// Data
+	let { is_author, project, session } = data
 	let html_code = '<!-- Loading... -->'
 	let css_code = '/* Loading... */'
+	// UI
+	let is_dirty = false
+	let has_edited = false
+	let delete_confirm = false
 
+	// References
 	let html_editor: editor.IStandaloneCodeEditor
 	let css_editor: editor.IStandaloneCodeEditor
-
-	let html_dirty = false
-	let css_dirty = false
 
 	const before_unload = (ev: BeforeUnloadEvent) => {
 		if (!is_dirty) return
 		ev.preventDefault()
 	}
 
-	onMount(async () => {
+	onMount(() => {
 		window.addEventListener('beforeunload', before_unload)
+		;(async () => {
+			const data = await load_project(project.data)
+			html_code = data.html_code
+			css_code = data.css_code
 
-		const data = await load_project(project.data)
-		html_code = data.html_code
-		css_code = data.css_code
-		update_head()
-		update_body()
-	})
+			setTimeout(() => {
+				update_head(false)
+				update_body(false)
+			}, 500)
+		})()
 
-	onDestroy(() => {
-		if (browser) {
+		return () => {
 			window.removeEventListener('beforeunload', before_unload)
 		}
 	})
@@ -53,7 +55,11 @@
 	})
 
 	let body = ''
-	const update_body = () => {
+	const update_body = (is_user_edit: boolean) => {
+		if (is_user_edit) {
+			is_dirty = true
+			// has_edited = true
+		}
 		if (html_editor) {
 			html_code = html_editor.getValue()
 		}
@@ -61,11 +67,46 @@
 	}
 
 	let head = ''
-	const update_head = () => {
+	const update_head = (is_user_edit: boolean) => {
+		if (is_user_edit) {
+			is_dirty = true
+			// has_edited = true
+		}
 		if (css_editor) {
 			css_code = css_editor.getValue()
 		}
-		head = `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${css_code}</style>`
+		const code = css_code.replace(`@import url('reset.css');`, reset_css)
+		head = `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${code}</style>`
+	}
+
+	const save_project = async () => {
+		const payload = {
+			name: project.name,
+			data: {
+				html_code: html_code,
+				css_code: css_code,
+			},
+		}
+		const response = await fetch(`/project/${project.id}`, {
+			method: 'PUT',
+			body: JSON.stringify(payload),
+			headers: { 'content-type': 'application/json' },
+		})
+		if (response.ok) {
+			is_dirty = false
+			has_edited = true
+			project.updated_at = new Date()
+		}
+	}
+
+	const delete_project = async () => {
+		const response = await fetch(`/project/${project.id}`, {
+			method: 'DELETE',
+			headers: { 'content-type': 'application/json' },
+		})
+		if (response.ok) {
+			setTimeout(() => goto('/'), 500)
+		}
 	}
 </script>
 
@@ -77,8 +118,18 @@
 	<header>
 		<div>
 			<a class="btn btn-text" href="/"> <div class="icon-double-left"></div> Back</a>
-			{#if is_author}
-				<button class="btn btn-text"><div class="icon-trash"></div> Delete</button>
+			{#if is_author || session.user.is_admin}
+				<button
+					class="btn btn-text"
+					class:btn-destructive={delete_confirm}
+					on:pointerleave={() => (delete_confirm = false)}
+					on:click={() => {
+						if (delete_confirm) delete_project()
+						else delete_confirm = true
+					}}
+				>
+					<div class="icon-trash"></div> Delete
+				</button>
 			{/if}
 		</div>
 
@@ -89,8 +140,9 @@
 				placeholder="Untitled Project"
 				autocomplete="off"
 				spellcheck="false"
-				bind:value={data.project.name}
+				bind:value={project.name}
 				use:auto_size
+				on:input={() => (is_dirty = true)}
 			/>
 			<h2>by {project.author.name}</h2>
 		</div>
@@ -98,9 +150,13 @@
 		<div>
 			<span>
 				{has_edited ? 'Last saved' : 'Last updated'}
-				<Timestamp date={data.project.updated_at} />
+				<Timestamp date={project.updated_at} />
 			</span>
-			<button class="btn btn-text btn-save btn-accent" disabled={!is_dirty && is_author}>
+			<button
+				class="btn btn-text btn-save btn-accent"
+				disabled={!is_dirty && is_author}
+				on:click={save_project}
+			>
 				{#if is_author}
 					<div class="icon-upload"></div>
 					Save
@@ -126,8 +182,7 @@
 						<div class="panel-content">
 							<CodeEditor
 								bind:editor={html_editor}
-								bind:is_dirty={html_dirty}
-								on:changed={update_body}
+								on:change={() => update_body(true)}
 								code={html_code}
 								lang="html"
 							/>
@@ -143,8 +198,7 @@
 						<div class="panel-content">
 							<CodeEditor
 								bind:editor={css_editor}
-								bind:is_dirty={css_dirty}
-								on:changed={update_head}
+								on:change={() => update_head(true)}
 								code={css_code}
 								lang="css"
 							/>
@@ -159,12 +213,12 @@
 					<div class="panel-header-title">Browser</div>
 					<div class="panel-header-content"></div>
 				</div>
-				<div class="panel-content">
+				<div class="panel-content" style="overflow: hidden; display: grid; place-items: stretch;">
 					<Embed
 						bind:head
 						bind:body
 						title={`Browser preview of "${project.name}" by ${project.author.name}`}
-						style="width: 100%; height: 100%; background-color: white;"
+						style="background-color: white;"
 					/>
 				</div>
 			</div>
@@ -224,7 +278,7 @@
 				> .btn-save {
 					margin-left: 1rem;
 					margin-right: 0;
-					transition: margin-right 600ms cubic-bezier(0.16, 1, 0.3, 1);
+					transition: margin-right 600ms 100ms cubic-bezier(0.16, 1, 0.3, 1);
 
 					min-width: 5rem;
 

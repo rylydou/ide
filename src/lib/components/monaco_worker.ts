@@ -38,7 +38,7 @@ self.MonacoEnvironment = {
 monaco.languages.html.htmlDefaults.setOptions({
 	// @ts-ignore
 	format: {
-		wrapLineLength: 100,
+		wrapLineLength: 80,
 	}
 })
 

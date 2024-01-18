@@ -3,8 +3,9 @@
 	import type { editor } from 'monaco-editor/esm/vs/editor/editor.api'
 	import { createEventDispatcher, onMount } from 'svelte'
 
-	const dispatcher = createEventDispatcher<{
-		changed: void
+	const dispatch = createEventDispatcher<{
+		load: void
+		change: void
 	}>()
 
 	export let code: string
@@ -29,10 +30,13 @@
 			value: code,
 			language: lang,
 		})
+		editor.onDidLayoutChange((e) => {
+			dispatch('load')
+		})
 
 		editor.onDidChangeModelContent((e) => {
 			is_dirty = true
-			dispatcher('changed')
+			dispatch('change')
 		})
 	})
 </script>

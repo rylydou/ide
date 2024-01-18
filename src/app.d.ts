@@ -6,10 +6,10 @@ declare global {
 			message?: string
 		}
 		interface Locals {
-			session?: AuthSession | null
+			session?: AuthSession
 		}
 		interface PageData {
-			session?: AuthSession | null
+			session?: AuthSession
 		}
 		// interface PageState {}
 		// interface Platform {}
