@@ -96,17 +96,19 @@ button {
 
 
 .link {
-	text-decoration: underline 1px;
-	text-underline-offset: 2px;
+	// text-decoration: underline 1px;
+	// text-underline-offset: 2px;
 	border-radius: var(--radius-sm);
 	color: var(--clr-accent);
 
 	&:hover,
 	&:focus-visible {
-		outline: solid 2px var(--clr-accent);
-		text-decoration: none;
-		background-color: var(--clr-accent);
-		color: #000;
+		text-decoration: underline 1px;
+		text-underline-offset: 2px;
+		// outline: solid 2px var(--clr-accent);
+		// text-decoration: none;
+		// background-color: var(--clr-accent);
+		// color: #000;
 	}
 }
 
@@ -118,119 +120,6 @@ button {
 	>* {
 		flex: 1;
 	}
-}
-
-
-.btn,
-.toggle {
-	--btn-bg: var(--clr-bg);
-	--btn-bg-hover: var(--clr-bg-hover);
-	--btn-fg: var(--clr-fg);
-	--btn-ring: currentColor;
-
-	min-width: 2.5rem;
-	min-height: 2.5rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 8px;
-	gap: 8px;
-	font-weight: bold;
-	border-radius: var(--radius);
-	background-color: var(--btn-bg);
-	color: var(--btn-fg);
-
-	&.btn-text {
-		padding-inline: 1rem;
-	}
-
-	&:not(:disabled) {
-
-		&:hover,
-		&:focus-visible {
-			background-color: var(--btn-bg-hover);
-		}
-
-		&:focus-visible {
-			outline: solid 2px var(--clr-accent);
-		}
-	}
-
-	&:disabled {
-		cursor: default;
-		opacity: .33;
-	}
-
-	&.btn-flat {
-		--btn-bg: transparent;
-		--btn-bg-hover: var(--clr-bg);
-		--btn-fg: currentColor;
-		outline-color: var(--clr-fg);
-		outline-offset: 2px;
-	}
-
-	&.btn-solid {
-		--btn-bg: var(--clr-fg);
-		--btn-bg-hover: var(--clr-fg-hover);
-		--btn-fg: var(--clr-bg);
-		outline-color: var(--clr-fg);
-		outline-offset: 2px;
-	}
-
-	&.btn-accent {
-		--btn-bg: var(--clr-accent);
-		--btn-bg-hover: var(--clr-accent-hover);
-		--btn-fg: var(--clr-on-accent);
-		outline-color: var(--clr-accent-hover);
-		outline-offset: 2px;
-	}
-
-	&.btn-destructive {
-		--btn-bg: var(--clr-red);
-		--btn-bg-hover: var(--clr-red);
-		--btn-fg: var(--clr-on-accent);
-	}
-}
-
-
-.form {
-	width: 24rem;
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-
-	label {
-		display: flex;
-		flex-direction: column;
-
-		>span {
-			padding-bottom: 4px;
-			font-weight: bold;
-		}
-	}
-
-	.message {
-		min-height: 4rem;
-		user-select: text;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 12px;
-		font-weight: bold;
-		border: solid 2px var(--clr-warn-fg);
-		border-radius: var(--radius-lg);
-		background-color: var(--clr-warn-bg);
-		color: var(--clr-warn-fg);
-
-		&:empty {
-			opacity: 0;
-		}
-	}
-}
-
-
-.form-tabbed {
-	min-height: 30rem;
 }
 
 
@@ -248,6 +137,7 @@ button {
 	&::placeholder {
 		color: var(--clr-muted-fg);
 		opacity: 1;
+		text-transform: none;
 	}
 
 	&:focus {
@@ -324,41 +214,6 @@ button {
 	&:focus-within {
 		outline: solid 2px var(--clr-accent);
 		// background-color: var(--clr-base);
-	}
-}
-
-
-.tabs {
-	margin-bottom: 1rem;
-	display: flex;
-	justify-content: stretch;
-	padding: 6px;
-	gap: 6px;
-	border-radius: var(--radius-lg);
-	background-color: var(--clr-bg);
-
-	>.tab {
-		flex: 1;
-		display: flex;
-		padding: .5rem 1rem;
-		border-radius: var(--radius);
-		justify-content: center;
-		color: var(--clr-muted-fg);
-		font-weight: bold;
-
-		&:hover,
-		&:focus-visible {
-			color: var(--clr-fg);
-		}
-
-		&:focus-visible {
-			outline: solid 2px currentColor;
-		}
-
-		&[aria-current]:not([aria-current=false]) {
-			background-color: var(--clr-base);
-			color: var(--clr-fg);
-		}
 	}
 }
 
@@ -449,10 +304,6 @@ button {
 			gap: 12px;
 			padding-bottom: 1.5rem;
 
-			>:first-child {
-				flex: 1;
-			}
-
 			>h2 {
 				flex: 1;
 				font-weight: bold;
@@ -479,7 +330,7 @@ button {
 	place-items: center;
 	gap: 8px;
 	border-radius: var(--radius-lg);
-	border: solid 2px var(--clr-bg);
+	// border: solid 2px var(--clr-bg);
 	background-color: var(--clr-bg);
 
 	.card-link {
@@ -499,7 +350,7 @@ button {
 	&:hover,
 	&:has(.card-link:focus-visible) {
 		background-color: var(--clr-bg-hover);
-		box-shadow: var(--shadow-card-hover);
+		// box-shadow: var(--shadow-card-hover);
 	}
 
 	&:has(.card-link:focus-visible) {
@@ -532,6 +383,14 @@ button {
 	>* {
 		flex: 1;
 	}
+}
+
+
+code {
+	font-family: var(--font-mono);
+	background-color: var(--clr-bg);
+	padding: 0 4px;
+	border-radius: var(--radius);
 }
 
 
@@ -593,3 +452,9 @@ button {
 .monaco-editor .margin {
 	background: unset !important;
 }
+
+
+@import 'parts/button.scss';
+@import 'parts/dialog.scss';
+@import 'parts/form.scss';
+@import 'parts/tab.scss';

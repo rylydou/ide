@@ -15,11 +15,6 @@
 
 	let editor_container: HTMLDivElement
 
-	const get_code = () => {
-		if (!editor) return
-		code = editor.getValue()
-	}
-
 	onMount(async () => {
 		await import('./monaco_worker')
 		const monaco = await import('monaco-editor/esm/vs/editor/editor.api')
@@ -30,6 +25,7 @@
 			value: code,
 			language: lang,
 		})
+
 		editor.onDidLayoutChange((e) => {
 			dispatch('load')
 		})

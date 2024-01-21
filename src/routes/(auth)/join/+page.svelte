@@ -10,7 +10,7 @@
 <main class="layout-center">
 	<form
 		class="form center-form form"
-		method="POST"
+		method="post"
 		use:enhance={() => {
 			is_waiting = true
 
@@ -39,9 +39,11 @@
 				class="password"
 				name="secret"
 				autocomplete="off"
+				spellcheck="false"
 				autofocus
 				bind:value={secret_input}
 				on:input={() => (message = '')}
+				style="text-transform: uppercase;"
 			/>
 		</label>
 

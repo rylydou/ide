@@ -2,7 +2,7 @@
 	export let value = ''
 </script>
 
-<label class="search-input">
+<label class="search-input" style="flex: 1;">
 	<span>
 		<div class="icon-search"></div>
 	</span>

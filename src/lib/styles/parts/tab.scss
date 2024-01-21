@@ -1,0 +1,34 @@
+.tabs {
+	margin-bottom: 1rem;
+	display: flex;
+	justify-content: stretch;
+	padding: 6px;
+	gap: 6px;
+	border-radius: var(--radius-lg);
+	background-color: var(--clr-bg);
+
+	>.tab {
+		flex: 1;
+		display: flex;
+		padding: .5rem 1rem;
+		border-radius: var(--radius);
+		justify-content: center;
+		color: var(--clr-muted-fg);
+		font-weight: bold;
+
+		&:hover,
+		&:focus-visible {
+			color: var(--clr-fg);
+		}
+
+		&:focus-visible {
+			outline: solid 2px currentColor;
+		}
+
+		.current,
+		&[aria-current]:not([aria-current=false]) {
+			background-color: var(--clr-base);
+			color: var(--clr-fg);
+		}
+	}
+}

@@ -4,13 +4,14 @@ import { z } from 'zod'
 import { db, encrypt, schema } from '$lib/server'
 import { eq, ilike } from 'drizzle-orm'
 import { grant_session, join_group } from '$lib/server/actions'
+import { cfg } from '$lib'
 
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	const join_secret = (cookies.get('join_secret') || '').trim()
 
 	const group = join_secret ? await db.query.group.findFirst({
-		where: ilike(schema.group.secret, join_secret),
+		where: eq(schema.group.secret, join_secret),
 	}) : null
 
 	if (!group) {
@@ -24,7 +25,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 
 
 export const actions: Actions = {
-	default: async ({ request, cookies, url }) => {
+	default: async ({ request, cookies, }) => {
 		const data_schema = z.object({
 			secret: z.string().trim().toLowerCase().min(6).max(6),
 			email: z.string().trim().toLowerCase(),
@@ -32,7 +33,7 @@ export const actions: Actions = {
 			password: z.string().min(8),
 		})
 
-		const secret = url.searchParams.get('secret')
+		const secret = cookies.get('join_secret')
 		if (!secret) {
 			throw redirect(303, '/join')
 		}
@@ -45,11 +46,15 @@ export const actions: Actions = {
 
 		if (!result.success) {
 			return fail(400, {
-				message: result.error.message,
+				message: result.error.errors[0].message,
 			})
 		}
 
 		const data = result.data
+
+		if (data.email.indexOf('@') < 0) {
+			data.email += cfg.default_email_domain
+		}
 
 		const group = db.query.group.findFirst({
 			where: eq(schema.group.secret, data.secret)

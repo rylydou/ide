@@ -1,26 +1,14 @@
 <script lang="ts">
-	import { ProjectCard, SearchInput } from '$lib/components'
+	import { browser } from '$app/environment'
+	import { UserCard } from '$lib/components'
 
-	import { flip } from 'svelte/animate'
-	import { expoOut as easing } from 'svelte/easing'
-	import { crossfade, scale } from 'svelte/transition'
 	import type { PageData } from './$types'
 
 	export let data: PageData
+	const { group } = data
 
-	let users_filter = ''
-
-	$: filtered_users = users_filter
-		? data.users.filter((user) => {
-				return user.name.toLowerCase().includes(users_filter.toLowerCase())
-			})
-		: data.users
-
-	const [send, receive] = crossfade({
-		duration: 200,
-		easing,
-		fallback: (node) => scale(node, { duration: 200 }),
-	})
+	let edit_dialog: HTMLDialogElement
+	let join_code_dialog: HTMLDialogElement
 </script>
 
 <svelte:head>
@@ -34,25 +22,117 @@
 
 	<section>
 		<header>
-			<SearchInput placeholder="Search your projects..." bind:value={users_filter} />
-			<div class="buttons">
-				<a class="btn btn-accent btn-text" href="/project/new" data-sveltekit-preload-data="off"
-					>New Project</a
+			<a class="btn btn-text" href="/"> <div class="icon-home"></div> Home</a>
+
+			{#if data.session.user.is_admin}
+				<button class="btn btn-text" on:click={() => edit_dialog.showModal()}>
+					<div class="icon-pencil"></div>Edit Class
+				</button>
+				<button
+					class="btn btn-text"
+					disabled={!group.secret}
+					on:click={() => join_code_dialog.showModal()}
 				>
-			</div>
+					<div class="icon-expand"></div> Show Join Code
+				</button>
+			{/if}
+
+			<div style="flex: 1;"></div>
 		</header>
 		<ul class="sec-content list-grid">
-			{#each filtered_users as project (project.id)}
-				<li
-					animate:flip={{ duration: 200, easing }}
-					out:send={{ key: project.id }}
-					in:receive={{ key: project.id }}
-				>
-					<ProjectCard {project} />
+			{#each group.users as user (user.id)}
+				<li>
+					<UserCard {user} />
 				</li>
-			{:else}
-				<li>{users_filter ? 'No results' : 'No one is in this class'}</li>
 			{/each}
 		</ul>
 	</section>
 </main>
+
+<dialog bind:this={edit_dialog} class="dialog">
+	<div class="dialog-header">
+		<h1>Edit Class</h1>
+		<form method="dialog">
+			<button class="btn" title="Close">
+				<div class="icon-close"></div>
+			</button>
+		</form>
+	</div>
+	<div class="dialog-content">
+		<form action={`${data.group.id}`} method="post" class="form">
+			<label>
+				<span>Class Name</span>
+				<input type="text" class="input" name="name" value={data.group.name} />
+			</label>
+			<label>
+				<span>Join Code</span>
+				<div class="input-group">
+					<input
+						type="text"
+						class="input"
+						name="secret"
+						autocomplete="off"
+						spellcheck="false"
+						placeholder="(unjoinable)"
+						style="text-transform: uppercase;"
+						bind:value={data.group.secret}
+					/>
+					<button
+						type="button"
+						class="btn"
+						on:click={() => (data.group.secret = '(randomize join code)')}
+					>
+						<div class="icon-redo"></div>
+					</button>
+				</div>
+			</label>
+			<button type="submit" class="btn">Update</button>
+		</form>
+	</div>
+</dialog>
+
+<dialog bind:this={join_code_dialog} class="dialog dialog-full">
+	<div class="dialog-header">
+		<h1>Join Code for {group.name}</h1>
+		<form method="dialog">
+			<button class="btn" title="Close">
+				<div class="icon-close"></div>
+			</button>
+		</form>
+	</div>
+
+	<div class="dialog-content join-content">
+		<div class="join-info">Join at <code>{browser ? location.host : ''}</code></div>
+		<div class="join-code">{group.secret || '------'}</div>
+	</div>
+</dialog>
+
+<style lang="scss">
+	.join-content {
+		height: calc(100vh - 7rem);
+	}
+
+	.join-info {
+		font-weight: bold;
+		font-size: 2rem;
+	}
+
+	.join-code {
+		text-align: center;
+		text-transform: uppercase;
+		font-family: var(--font-mono);
+		font-feature-settings:
+			'liga' 0,
+			'zero' 1;
+		font-weight: 900;
+		font-size: 18vw;
+		line-height: 18vw;
+		letter-spacing: 2vw;
+		background-color: white;
+		color: black;
+		padding: 1rem 2rem;
+		margin-block: 3rem;
+		border-radius: var(--radius-lg);
+		// rotate: -1deg;
+	}
+</style>

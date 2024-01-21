@@ -1,15 +1,23 @@
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { db, schema } from '..'
 
 
 export const join_group = async (secret: string, user_id: number) => {
 	const group = await db.query.group.findFirst({
 		where: eq(schema.group.secret, secret),
+		columns: {
+			id: true,
+		},
 	})
 	if (!group) return
-	if (group.user_ids.indexOf(user_id) >= 0) return
-	group.user_ids.push(user_id)
-	await db.update(schema.group).set({
-		user_ids: group.user_ids
+
+	const found_group = await db.query.users_to_groups.findFirst({
+		where: and(eq(schema.users_to_groups.user_id, user_id), eq(schema.users_to_groups.group_id, group.id)),
+	})
+	if (found_group) return
+
+	await db.insert(schema.users_to_groups).values({
+		user_id: user_id,
+		group_id: group.id,
 	})
 }

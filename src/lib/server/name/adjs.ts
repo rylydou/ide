@@ -94,7 +94,6 @@ export const adjs: string[] = [
 	'Worthy',
 	'Yappy',
 	'Yielding',
-	'Yodelling',
 	'Zealous',
 	'Devoted',
 	'Divine',

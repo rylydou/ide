@@ -6,7 +6,7 @@ import { id, str, table } from './shared'
 export const group = table('group', {
 	id: id('id'),
 	name: str('name').notNull(),
-	secret: str('secret').unique('group-secret'),
+	secret: str('secret').default('').notNull().unique('group-secret'),
 })
 
 

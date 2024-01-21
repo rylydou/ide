@@ -4,6 +4,8 @@ export interface AuthSession {
 	user: {
 		id: number
 		name: string
+		email: string
+		created_at: Date
 		is_admin: boolean
 	},
 }

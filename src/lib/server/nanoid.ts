@@ -4,8 +4,27 @@ import { webcrypto as crypto } from 'node:crypto'
 
 
 export const url_alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-'
-// Excludes(similar letter): Z(2) I(1) O(0) L(1)
-export const human_alphabet = '1234567890ABCDEFGHJKMNPQRTUVWXY'
+
+// Excludes(similar letter): O(0) I(1,L) L(1,I) Z(2) S(5) G(6)
+// export const human_alphabet = '1234567890ABCDEFGHJKMNPQRTUVWXY'
+// export const ambiguous_sets: [string, string][] = [
+// 	['o', '0'],
+// 	['i', '1'],
+// 	['l', '1'],
+// 	['z', '2'],
+// 	['s', '5'],
+// 	['g', '6'],
+// ]
+
+export const human_alphabet = 'ABCDEFGHJKMNPQRTUVWXY'
+export const ambiguous_sets: [string, string][] = []
+
+export const fix_ambiguous = (str: string): string => {
+	for (const [from, to] of ambiguous_sets) {
+		str = str.replaceAll(from, to)
+	}
+	return str
+}
 
 
 export const url_id = custom_alphabet(url_alphabet, 15)

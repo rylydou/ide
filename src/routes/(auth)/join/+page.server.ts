@@ -1,4 +1,4 @@
-import { db, schema } from '$lib/server'
+import { db, fix_ambiguous, schema } from '$lib/server'
 import { join_group } from '$lib/server/actions'
 import { fail, redirect } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
@@ -17,7 +17,7 @@ export type FormResponse = {
 export const actions: Actions = {
 	default: async ({ request, locals, cookies }) => {
 		const form_schema = z.object({
-			secret: z.string().toLowerCase(),
+			secret: z.string().min(4).toLowerCase().transform((str) => fix_ambiguous(str)),
 		})
 
 		const form_data = await request.formData()

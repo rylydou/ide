@@ -12,9 +12,12 @@
 	export let data: PageData
 
 	// Data
-	let { is_author, project, session } = data
+	let { project, session } = data
+	let is_author = project.author_id == session.user.id
+
 	let html_code = '<!-- Loading... -->'
 	let css_code = '/* Loading... */'
+
 	// UI
 	let is_dirty = false
 	let has_edited = false
@@ -96,6 +99,14 @@
 			is_dirty = false
 			has_edited = true
 			project.updated_at = new Date()
+
+			const data = await response.json()
+			if (data.forked_to) {
+				project.id = Number(data.forked_to) || project.id
+				project.author = session.user
+				is_author = true
+				history.replaceState(history.state, '', `/project/${project.id}`)
+			}
 		}
 	}
 
@@ -117,7 +128,7 @@
 <div class="project-layout">
 	<header>
 		<div>
-			<a class="btn btn-text" href="/"> <div class="icon-double-left"></div> Back</a>
+			<a class="btn btn-text" href="/"> <div class="icon-home"></div> Home</a>
 			{#if is_author || session.user.is_admin}
 				<button
 					class="btn btn-text"

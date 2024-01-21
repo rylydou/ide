@@ -37,13 +37,11 @@ export const actions: Actions = {
 			name: data.name,
 			email: data.email,
 			password: encrypted_password,
-			role: 'admin',
-			projects: [],
+			is_admin: true,
 		}).returning())[0]
 
 		cookies.delete('join_secret', { path: '/' })
 		await grant_session(new_user.id, cookies)
-		await join_group(data.secret, new_user.id)
 
 		throw redirect(303, '/')
 	},

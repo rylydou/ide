@@ -10,7 +10,7 @@
 <main class="layout-center">
 	<form
 		class="form center-form form-tabbed"
-		method="POST"
+		method="post"
 		use:enhance={() => {
 			is_waiting = true
 

@@ -1,4 +1,4 @@
-* {
+*:not(dialog) {
 	appearance: none;
 	
 	box-sizing: border-box;
@@ -20,6 +20,10 @@
 	color: unset;
 	text-decoration: unset;
 	
+}
+
+
+ul, ol {
 	list-style: none;
 }
 
@@ -32,4 +36,16 @@ img {
 	background-repeat: no-repeat;
 	background-size: cover;
 	shape-margin: 1rem;
+}
+
+
+dialog {
+	appearance: none;
+	box-sizing: border-box;
+	padding: unset;
+	border: unset;
+	background: unset;
+	max-width: unset;
+	max-height: unset;
+	padding: unset;
 }

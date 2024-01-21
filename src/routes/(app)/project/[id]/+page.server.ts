@@ -27,18 +27,13 @@ export const load = (async ({ locals, params }) => {
 
 	if (!project) throw error(404)
 
-	let is_author = false
 
-	if (project?.author_id === user.id) {
-		is_author = true
-	}
-	else {
+	if (project?.author_id !== user.id) {
 		// If the user is not the author then they can only view projects by users in the same groups as them
 		await is_users_mutuals(user.id, project.author_id)
 	}
 
 	return {
-		is_author,
 		project,
 	}
 }) satisfies PageServerLoad

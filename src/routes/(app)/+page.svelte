@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { page } from '$app/stores'
 	import { greet } from '$lib'
 	import { GroupCard, ProjectCard, SearchInput } from '$lib/components'
-	import type { PageData } from './$types'
-	import { page } from '$app/stores'
-	import { crossfade, scale } from 'svelte/transition'
-	import { expoOut as easing } from 'svelte/easing'
 	import { flip } from 'svelte/animate'
+	import { expoOut as easing } from 'svelte/easing'
+	import { crossfade, scale } from 'svelte/transition'
+	import type { PageData } from './$types'
 
 	export let data: PageData
 

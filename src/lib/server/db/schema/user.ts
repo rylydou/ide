@@ -1,6 +1,6 @@
 import { relations } from 'drizzle-orm'
 import { project, session, users_to_groups } from '.'
-import { id, table, str, timestamp } from './shared'
+import { bool, id, str, table, timestamp } from './shared'
 
 
 export const user = table('user', {
@@ -9,7 +9,7 @@ export const user = table('user', {
 	name: str('name').notNull(),
 	password: str('password', { length: 60 }).notNull(),
 	created_at: timestamp('created_at').notNull(),
-	role: str('role', { enum: ['student', 'admin'] }).default('student').notNull(),
+	is_admin: bool('is_admin').default(false).notNull(),
 })
 
 

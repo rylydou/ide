@@ -5,8 +5,8 @@ import { ref, table } from './shared'
 
 
 export const users_to_groups = table('users_to_groups', {
-	user_id: ref('user_id').notNull().references(() => user.id),
-	group_id: ref('group_id').notNull().references(() => group.id),
+	user_id: ref('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+	group_id: ref('group_id').notNull().references(() => group.id, { onDelete: 'cascade' }),
 }, (t) => ({
 	pk: primaryKey({ columns: [t.user_id, t.group_id] }),
 }),

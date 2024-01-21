@@ -1,0 +1,70 @@
+.btn,
+.toggle {
+	--btn-bg: var(--clr-bg);
+	--btn-bg-hover: var(--clr-bg-hover);
+	--btn-fg: var(--clr-fg);
+	--btn-ring: currentColor;
+
+	min-width: 2.5rem;
+	min-height: 2.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px;
+	gap: 12px;
+	font-weight: bold;
+	border-radius: var(--radius);
+	background-color: var(--btn-bg);
+	color: var(--btn-fg);
+
+	&.btn-text {
+		padding-inline: 1rem;
+	}
+
+	&:not(:disabled) {
+
+		&:hover,
+		&:focus-visible {
+			background-color: var(--btn-bg-hover);
+		}
+
+		&:focus-visible {
+			outline: solid 2px var(--clr-accent);
+		}
+	}
+
+	&:disabled {
+		cursor: default;
+		opacity: .33;
+	}
+
+	&.btn-flat {
+		--btn-bg: transparent;
+		--btn-bg-hover: var(--clr-bg);
+		--btn-fg: currentColor;
+		outline-color: var(--clr-fg);
+		outline-offset: 2px;
+	}
+
+	&.btn-solid {
+		--btn-bg: var(--clr-fg);
+		--btn-bg-hover: var(--clr-fg-hover);
+		--btn-fg: var(--clr-bg);
+		outline-color: var(--clr-fg);
+		outline-offset: 2px;
+	}
+
+	&.btn-accent {
+		--btn-bg: var(--clr-accent);
+		--btn-bg-hover: var(--clr-accent-hover);
+		--btn-fg: var(--clr-on-accent);
+		outline-color: var(--clr-accent-hover);
+		outline-offset: 2px;
+	}
+
+	&.btn-destructive {
+		--btn-bg: var(--clr-red);
+		--btn-bg-hover: var(--clr-red);
+		--btn-fg: var(--clr-on-accent);
+	}
+}
