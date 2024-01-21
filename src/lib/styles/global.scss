@@ -59,7 +59,8 @@ html {
 
 	font-family: var(--font-body);
 	font-size: 1rem;
-	line-height: 1.5rem;
+	// line-height: 1.5rem;
+	line-height: 1.5;
 
 	background-color: var(--clr-base);
 	color: var(--clr-fg);
@@ -101,14 +102,16 @@ button {
 	border-radius: var(--radius-sm);
 	color: var(--clr-accent);
 
-	&:hover,
-	&:focus-visible {
+	&:hover {
 		text-decoration: underline 1px;
 		text-underline-offset: 2px;
-		// outline: solid 2px var(--clr-accent);
-		// text-decoration: none;
-		// background-color: var(--clr-accent);
-		// color: #000;
+	}
+
+	&:focus-visible {
+		outline: solid 2px var(--clr-accent);
+		text-decoration: none;
+		background-color: var(--clr-accent);
+		color: #000;
 	}
 }
 

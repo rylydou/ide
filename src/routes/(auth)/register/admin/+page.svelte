@@ -6,6 +6,10 @@
 	let is_waiting = false
 </script>
 
+<svelte:head>
+	<title>Register as Admin - IDE</title>
+</svelte:head>
+
 <main class="layout-center">
 	<form
 		class="form center-form form-tabbed"

@@ -36,6 +36,8 @@ export const actions: Actions = {
 			columns: { id: true, }
 		})
 
+		console.log(data.secret)
+
 		if (!group) {
 			return fail(401, {
 				message: 'Invalid secret code',

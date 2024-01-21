@@ -45,7 +45,7 @@
 	})
 </script>
 
-<div bind:this={editor_container} class="code-editor"> </div>
+<div bind:this={editor_container} class="code-editor" {...$$restProps}> </div>
 
 <style lang="scss">
 	.code-editor {

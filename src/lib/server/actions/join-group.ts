@@ -3,6 +3,9 @@ import { db, schema } from '..'
 
 
 export const join_group = async (secret: string, user_id: number) => {
+	secret = secret.toLowerCase()
+	if (secret.length < 4) return
+
 	const group = await db.query.group.findFirst({
 		where: eq(schema.group.secret, secret),
 		columns: {

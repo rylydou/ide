@@ -18,15 +18,19 @@
 
 	let html_code = '<!-- Loading... -->'
 	let css_code = '/* Loading... */'
+	let js_code = '// Loading...'
 
 	// UI
+	let is_saving = false
 	let is_dirty = false
 	let has_edited = false
 	let delete_confirm = false
+	let tab_index = 0
 
 	// References
 	let html_editor: editor.IStandaloneCodeEditor
 	let css_editor: editor.IStandaloneCodeEditor
+	let js_editor: editor.IStandaloneCodeEditor
 
 	const before_unload = (ev: BeforeUnloadEvent) => {
 		if (!is_dirty) return
@@ -39,10 +43,12 @@
 			const data = await load_project(project.data)
 			html_code = data.html_code
 			css_code = data.css_code
+			js_code = data.js_code
 
 			setTimeout(() => {
 				update_head(false)
 				update_body(false)
+				update_js(false)
 			}, 500)
 		})()
 
@@ -68,11 +74,12 @@
 	const update_body = (is_user_edit: boolean) => {
 		if (is_user_edit) {
 			is_dirty = true
-			// has_edited = true
 		}
 		if (html_editor) {
 			html_code = html_editor.getValue()
 		}
+
+		console.log('updating')
 		body = html_code
 	}
 
@@ -80,7 +87,6 @@
 	const update_head = (is_user_edit: boolean) => {
 		if (is_user_edit) {
 			is_dirty = true
-			// has_edited = true
 		}
 		if (css_editor) {
 			css_code = css_editor.getValue()
@@ -89,15 +95,29 @@
 		head = `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${code}</style>`
 	}
 
+	let js = ''
+	const update_js = (is_user_edit: boolean) => {
+		if (is_user_edit) {
+			is_dirty = true
+		}
+		if (js_editor) {
+			js_code = js_editor.getValue()
+		}
+
+		js = js_code
+	}
+
 	const save_project = async () => {
 		is_dirty = false
 		has_edited = true
+		is_saving = true
 
 		const payload = {
 			name: project.name,
 			data: {
 				html_code: html_code,
 				css_code: css_code,
+				js_code: js_code,
 			},
 		}
 		const response = await fetch(`/project/${project.id}`, {
@@ -107,6 +127,7 @@
 		})
 		if (response.ok) {
 			project.updated_at = new Date()
+			is_saving = false
 
 			const data = await response.json()
 			if (data.forked_to) {
@@ -173,12 +194,18 @@
 			</span>
 			<button
 				class="btn btn-text btn-save btn-accent"
-				disabled={!is_dirty && is_author}
+				class:hidden={!is_saving && is_author && !is_dirty}
+				disabled={is_saving || (is_author && !is_dirty)}
 				on:click={save_project}
 			>
 				{#if is_author}
-					<div class="icon-upload"></div>
-					Save
+					{#if is_saving}
+						Saving...
+					{:else}
+						<div class="icon-upload"></div> Save
+					{/if}
+				{:else if is_saving}
+					Forking...
 				{:else}
 					<div class="icon-copy"></div>
 					{is_dirty ? 'Fork*' : 'Fork'}
@@ -194,7 +221,9 @@
 					<div class="panel">
 						<div class="panel-header">
 							<div class="panel-header">
-								<div class="panel-header-title">HTML</div>
+								<div class="panel-tabs">
+									<button class="panel-tab" aria-current="true">HTML</button>
+								</div>
 								<div class="panel-header-content"></div>
 							</div>
 						</div>
@@ -211,16 +240,37 @@
 				<Pane>
 					<div class="panel">
 						<div class="panel-header">
-							<div class="panel-header-title">CSS</div>
+							<div class="panel-tabs">
+								<button
+									class="panel-tab"
+									aria-current={tab_index === 0}
+									on:click={() => (tab_index = 0)}>CSS</button
+								>
+								<button
+									class="panel-tab"
+									aria-current={tab_index === 1}
+									on:click={() => (tab_index = 1)}>JS</button
+								>
+							</div>
 							<div class="panel-header-content"></div>
 						</div>
 						<div class="panel-content">
-							<CodeEditor
-								bind:editor={css_editor}
-								on:change={() => update_head(true)}
-								code={css_code}
-								lang="css"
-							/>
+							<div style="height: 100%; display: {tab_index === 0 ? 'block' : 'none'};">
+								<CodeEditor
+									bind:editor={css_editor}
+									on:change={() => update_head(true)}
+									code={css_code}
+									lang="css"
+								/>
+							</div>
+							<div style="height: 100%; display: {tab_index === 1 ? 'block' : 'none'};">
+								<CodeEditor
+									bind:editor={js_editor}
+									on:change={() => update_js(true)}
+									code={js_code}
+									lang="javascript"
+								/>
+							</div>
 						</div>
 					</div>
 				</Pane>
@@ -229,13 +279,16 @@
 		<Pane class="browser">
 			<div class="panel">
 				<div class="panel-header">
-					<div class="panel-header-title">Browser</div>
+					<div class="panel-tabs">
+						<button class="panel-tab" aria-current="true">Web Browser</button>
+					</div>
 					<div class="panel-header-content"></div>
 				</div>
 				<div class="panel-content" style="overflow: hidden; display: grid; place-items: stretch;">
 					<Embed
 						bind:head
 						bind:body
+						bind:js
 						title={`Browser preview of "${project.name}" by ${project.author.name}`}
 						style="background-color: white;"
 					/>
@@ -301,7 +354,7 @@
 
 					min-width: 5rem;
 
-					&:disabled {
+					&.hidden {
 						margin-right: -7rem;
 						transition: margin-right 200ms ease-in-out;
 					}
@@ -321,14 +374,28 @@
 		display: flex;
 	}
 
-	.panel-header-title {
+	.panel-tabs {
+		display: flex;
+	}
+
+	.panel-tab {
 		display: flex;
 		align-items: center;
 		padding-inline: 1.5rem;
 		font-weight: bold;
 		border-top-left-radius: var(--radius-lg);
 		border-top-right-radius: var(--radius-lg);
-		background-color: var(--clr-bg);
+
+		&:not([aria-current='false']) {
+			background-color: var(--clr-bg);
+			box-shadow: 0 2rem var(--clr-bg);
+		}
+
+		&:hover,
+		&:focus-visible {
+			background-color: var(--clr-bg-hover);
+			box-shadow: 0 2rem var(--clr-bg-hover);
+		}
 	}
 
 	.panel-header-content {
@@ -339,7 +406,7 @@
 
 	.panel-content {
 		border-radius: var(--radius-lg);
-		border-top-left-radius: 0;
+		// border-top-left-radius: 0;
 		background-color: var(--clr-bg);
 
 		min-height: 0;

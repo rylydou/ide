@@ -16,7 +16,7 @@ export const url_alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmn
 // 	['g', '6'],
 // ]
 
-export const human_alphabet = 'ABCDEFGHJKMNPQRTUVWXY'
+export const human_alphabet = 'abcdefghjkmnpqrtuvwxy'
 export const ambiguous_sets: [string, string][] = []
 
 export const fix_ambiguous = (str: string): string => {

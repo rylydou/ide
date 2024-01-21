@@ -26,6 +26,10 @@
 	})
 </script>
 
+<svelte:head>
+	<title>IDE Home</title>
+</svelte:head>
+
 <main class="dash-layout">
 	<header>
 		<h1>{greeting}</h1>

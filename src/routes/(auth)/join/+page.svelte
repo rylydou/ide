@@ -7,6 +7,10 @@
 	let secret_input = ''
 </script>
 
+<svelte:head>
+	<title>Join - IDE</title>
+</svelte:head>
+
 <main class="layout-center">
 	<form
 		class="form center-form form"

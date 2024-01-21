@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment'
-	import { UserCard } from '$lib/components'
+	import { SearchInput, UserCard } from '$lib/components'
 
 	import type { PageData } from './$types'
 
@@ -9,6 +9,15 @@
 
 	let edit_dialog: HTMLDialogElement
 	let join_code_dialog: HTMLDialogElement
+
+	let filter = ''
+
+	$: filtered_users = filter
+		? group.users.filter(
+				(user) =>
+					user.name.includes(filter) || user.projects.some(({ name }) => name.includes(filter)),
+			)
+		: group.users
 </script>
 
 <svelte:head>
@@ -39,8 +48,13 @@
 
 			<div style="flex: 1;"></div>
 		</header>
+
+		<header>
+			<SearchInput placeholder="Search for users and projects..." bind:value={filter} />
+		</header>
+
 		<ul class="sec-content list-grid">
-			{#each group.users as user (user.id)}
+			{#each filtered_users as user (user.id)}
 				<li>
 					<UserCard {user} />
 				</li>
