@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { cfg } from '$lib'
+	import hotkeys from 'hotkeys-js'
 	import type { editor } from 'monaco-editor/esm/vs/editor/editor.api'
 	import { createEventDispatcher, onMount } from 'svelte'
 
@@ -33,6 +34,13 @@
 		editor.onDidChangeModelContent((e) => {
 			is_dirty = true
 			dispatch('change')
+		})
+
+		editor.addAction({
+			id: 'save',
+			label: 'Save',
+			keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+			run: () => hotkeys.trigger('ctrl+s'),
 		})
 	})
 </script>

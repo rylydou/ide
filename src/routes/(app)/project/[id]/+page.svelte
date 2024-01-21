@@ -8,6 +8,7 @@
 	import { onMount } from 'svelte'
 	import { Pane, Splitpanes } from 'svelte-splitpanes'
 	import type { PageData } from './$types'
+	import hotkeys from 'hotkeys-js'
 
 	export let data: PageData
 
@@ -44,6 +45,12 @@
 				update_body(false)
 			}, 500)
 		})()
+
+		hotkeys('ctrl+s', () => {
+			if (!is_dirty) return false
+			save_project()
+			return false
+		})
 
 		return () => {
 			window.removeEventListener('beforeunload', before_unload)
@@ -83,6 +90,9 @@
 	}
 
 	const save_project = async () => {
+		is_dirty = false
+		has_edited = true
+
 		const payload = {
 			name: project.name,
 			data: {
@@ -96,8 +106,6 @@
 			headers: { 'content-type': 'application/json' },
 		})
 		if (response.ok) {
-			is_dirty = false
-			has_edited = true
 			project.updated_at = new Date()
 
 			const data = await response.json()
