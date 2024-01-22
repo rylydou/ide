@@ -148,6 +148,8 @@
 			setTimeout(() => goto('/'), 500)
 		}
 	}
+
+	let is_fullscreen = false
 </script>
 
 <svelte:head>
@@ -277,12 +279,20 @@
 			</Splitpanes>
 		</Pane>
 		<Pane class="browser">
-			<div class="panel">
+			<div class="panel" class:fullscreen={is_fullscreen}>
 				<div class="panel-header">
 					<div class="panel-tabs">
 						<button class="panel-tab" aria-current="true">Web Browser</button>
 					</div>
-					<div class="panel-header-content"></div>
+					<div class="panel-header-content">
+						<button class="btn btn-flat" on:click={() => (is_fullscreen = !is_fullscreen)}>
+							{#if is_fullscreen}
+								<div class="icon-fullscreen_exit"></div>
+							{:else}
+								<div class="icon-fullscreen"></div>
+							{/if}
+						</button>
+					</div>
 				</div>
 				<div class="panel-content" style="overflow: hidden; display: grid; place-items: stretch;">
 					<Embed
@@ -328,38 +338,37 @@
 			> :nth-child(2) {
 				display: flex;
 				justify-self: center;
-
-				> .project-name {
-					align-self: center;
-					justify-self: center;
-					padding: 0.5rem;
-					font-weight: bold;
-					font-size: 1.25rem;
-					margin-right: 8px;
-
-					&:placeholder-shown {
-						min-width: 10.5rem;
-					}
-				}
+				gap: 0;
 			}
 
 			> :last-child {
 				justify-self: end;
 				gap: 1rem;
-
-				> .btn-save {
-					margin-left: 1rem;
-					margin-right: 0;
-					transition: margin-right 600ms 100ms cubic-bezier(0.16, 1, 0.3, 1);
-
-					min-width: 5rem;
-
-					&.hidden {
-						margin-right: -7rem;
-						transition: margin-right 200ms ease-in-out;
-					}
-				}
 			}
+		}
+	}
+
+	.project-name {
+		align-self: center;
+		justify-self: center;
+		padding: 0 1rem;
+		font-weight: bold;
+		font-size: 1.25rem;
+
+		&:placeholder-shown {
+			min-width: 10.5rem;
+		}
+	}
+
+	.btn-save {
+		min-width: 5rem;
+		margin-left: 1rem;
+		margin-right: 0;
+		transition: margin-right 600ms 100ms cubic-bezier(0.16, 1, 0.3, 1);
+
+		&.hidden {
+			margin-right: -7rem;
+			transition: margin-right 200ms ease-in-out;
 		}
 	}
 
@@ -368,6 +377,13 @@
 		height: 100%;
 		display: grid;
 		grid-template-rows: 2.5rem auto;
+		background-color: var(--clr-base);
+
+		&.fullscreen {
+			position: fixed;
+			inset: 0;
+			padding: 1rem;
+		}
 	}
 
 	.panel-header {
@@ -399,6 +415,7 @@
 	}
 
 	.panel-header-content {
+		flex: 1;
 		display: flex;
 		justify-content: end;
 		align-items: center;

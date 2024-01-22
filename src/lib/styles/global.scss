@@ -166,17 +166,23 @@ button {
 	border: none;
 	border-radius: var(--radius);
 	background-color: transparent;
+	text-decoration: underline dotted 1px var(--clr-muted-bg);
 
 	&:hover,
 	&:focus {
-		outline: solid 2px var(--clr-bg);
-		background-color: var(--clr-input-bg);
-		color: var(--clr-input-fg);
+		outline: none;
+		text-decoration-style: solid;
+		text-decoration-thickness: 2px;
+		text-decoration-color: var(--clr-fg);
 	}
 
 	&:focus {
-		outline: solid 2px var(--clr-accent);
+		text-decoration-color: var(--clr-accent);
 	}
+
+	// &:focus {
+	// 	outline: solid 2px var(--clr-accent);
+	// }
 }
 
 

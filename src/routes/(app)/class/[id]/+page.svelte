@@ -146,7 +146,6 @@
 		color: black;
 		padding: 1rem 2rem;
 		margin-block: 3rem;
-		border-radius: var(--radius-lg);
-		// rotate: -1deg;
+		border-radius: 2vw;
 	}
 </style>
