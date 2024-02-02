@@ -108,6 +108,11 @@
 	}
 
 	const save_project = async () => {
+		if (html_code.length + css_code.length + js_code.length >= 8_192) {
+			window.alert('There is too much code to save. Please remove some code and try again later.')
+			return
+		}
+
 		is_dirty = false
 		has_edited = true
 		is_saving = true
@@ -145,7 +150,7 @@
 			headers: { 'content-type': 'application/json' },
 		})
 		if (response.ok) {
-			setTimeout(() => goto('/'), 500)
+			goto('/')
 		}
 	}
 
@@ -182,6 +187,7 @@
 				placeholder="Untitled Project"
 				autocomplete="off"
 				spellcheck="false"
+				maxlength="30"
 				bind:value={project.name}
 				use:auto_size
 				on:input={() => (is_dirty = true)}
@@ -356,7 +362,7 @@
 		font-size: 1.25rem;
 
 		&:placeholder-shown {
-			min-width: 10.5rem;
+			min-width: 11.5rem;
 		}
 	}
 

@@ -7,9 +7,11 @@ import type { AuthSession } from '$lib/types'
 
 
 const project_save_schema = z.object({
-	name: z.string(),
+	name: z.string().max(40, 'Project name is too long.'),
 	data: z.any(),
 })
+
+const max_payload_length = 3_000
 
 
 const get_project = async (user: AuthSession['user'], params_id: unknown) => {
@@ -68,6 +70,9 @@ export const PUT: RequestHandler = async ({ request, locals, params }) => {
 export const DELETE: RequestHandler = async ({ locals, params }) => {
 	if (!locals.session) throw error(401)
 	const { user } = locals.session
+
+	if (!user.is_admin && String(user.id) !== params.id)
+		throw error(404)
 
 	const project = await get_project(user, params.id)
 	await db.delete(schema.project).where(eq(schema.project.id, project.id))

@@ -120,6 +120,7 @@ export const monaco_theme: editor.IStandaloneThemeData = {
 
 export const monaco_options: editor.IStandaloneEditorConstructionOptions = {
 	theme: 'zuhgy-dark',
+	maxTokenizationLineLength: 4_096,
 	automaticLayout: true,
 	minimap: {
 		enabled: false,

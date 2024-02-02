@@ -42,17 +42,32 @@
 
 		<label>
 			<span>School email (no need for {cfg.default_email_domain})</span>
-			<input class="input" type="text" name="email" autocomplete="email" autofocus />
+			<input
+				class="input"
+				type="text"
+				name="email"
+				autocomplete="email"
+				autofocus
+				minlength="3"
+				maxlength="40"
+			/>
 		</label>
 
 		<label>
 			<span>Full name</span>
-			<input class="input" type="text" name="name" autocomplete="name" />
+			<input
+				class="input"
+				type="text"
+				name="name"
+				autocomplete="name"
+				minlength="3"
+				maxlength="20"
+			/>
 		</label>
 
 		<label>
 			<span>Password</span>
-			<PasswordInput name="password" autocomplete="new-password" />
+			<PasswordInput name="password" autocomplete="new-password" minlength="8" maxlength="64" />
 		</label>
 
 		<button type="submit" class="btn" disabled={is_waiting}>Register</button>

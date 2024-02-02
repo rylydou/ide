@@ -1,44 +1,44 @@
 {
-  "name": "builder",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "web:build": "vite build",
-    "web:preview": "vite preview --host",
-    "web:dev": "vite dev --host",
-    "db:migrate": "bun scripts/migrate.ts",
-    "db:studio": "drizzle-kit studio",
-    "db:generate": "drizzle-kit generate:sqlite",
-    "db:push": "drizzle-kit push:sqlite",
-    "vercel:pull": "vercel env pull .env"
-  },
-  "devDependencies": {
-    "@iconify/tools": "^4.0.0",
-    "@iconify/utils": "^2.1.16",
-    "@sveltejs/kit": "^2.4.1",
-    "@sveltejs/vite-plugin-svelte": "^3.0.1",
-    "@types/bcrypt": "5.0.2",
-    "@unocss/extractor-svelte": "^0.58.3",
-    "drizzle-kit": "^0.20.13",
-    "sass": "^1.70.0",
-    "svelte": "^4.2.9",
-    "tslib": "^2.6.2",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.12"
-  },
-  "dependencies": {
-    "@libsql/client": "^0.4.0-pre.10",
-    "@sveltejs/adapter-auto": "^3.1.1",
-    "bcrypt": "5.1.1",
-    "dotenv": "^16.3.2",
-    "drizzle-orm": "^0.29.3",
-    "drizzle-zod": "^0.5.1",
-    "emmet-monaco-es": "^5.3.0",
-    "hotkeys-js": "^3.13.5",
-    "monaco-editor": "^0.45.0",
-    "svelte-splitpanes": "^0.8.0",
-    "unocss": "^0.58.3",
-    "zod": "^3.22.4"
-  },
-  "type": "module"
+	"name": "builder",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"web:dev": "vite dev --host",
+		"web:build": "vite build",
+		"web:preview": "vite preview --host",
+		"db:studio": "drizzle-kit studio",
+		"db:push": "drizzle-kit push:sqlite",
+		"db:migrate": "bun scripts/migrate.ts",
+		"db:generate": "drizzle-kit generate:sqlite",
+		"vc:pull": "vercel env pull .env"
+	},
+	"devDependencies": {
+		"@iconify/tools": "^4.0.0",
+		"@iconify/utils": "^2.1.20",
+		"@sveltejs/kit": "^2.5.0",
+		"@sveltejs/vite-plugin-svelte": "^3.0.2",
+		"@types/bcrypt": "5.0.2",
+		"@unocss/extractor-svelte": "^0.58.4",
+		"drizzle-kit": "^0.20.14",
+		"sass": "^1.70.0",
+		"svelte": "^4.2.9",
+		"tslib": "^2.6.2",
+		"typescript": "^5.3.3",
+		"vite": "^5.0.12"
+	},
+	"dependencies": {
+		"@libsql/client": "^0.4.3",
+		"@sveltejs/adapter-auto": "^3.1.1",
+		"bcrypt": "5.1.1",
+		"dotenv": "^16.4.1",
+		"drizzle-orm": "^0.29.3",
+		"drizzle-zod": "^0.5.1",
+		"emmet-monaco-es": "^5.3.0",
+		"hotkeys-js": "^3.13.5",
+		"monaco-editor": "^0.45.0",
+		"svelte-splitpanes": "^0.8.0",
+		"unocss": "^0.58.4",
+		"zod": "^3.22.4"
+	},
+	"type": "module"
 }

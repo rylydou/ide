@@ -16,7 +16,7 @@
 	<ul>
 		{#each user.projects as project}
 			<li>
-				<a class="link" href={`/project/${project.id}`}>{project.name}</a>
+				<a class="link" href={`/project/${project.id}`}>{project.name || 'Untitled Project'}</a>
 			</li>
 		{:else}
 			<span style="opacity: .5; font-style: italic;">No projects...</span>

@@ -45,6 +45,7 @@
 				autocomplete="off"
 				spellcheck="false"
 				autofocus
+				maxlength="8"
 				bind:value={secret_input}
 				on:input={() => (message = '')}
 				style="text-transform: uppercase;"
