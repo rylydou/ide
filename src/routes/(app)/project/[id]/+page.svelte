@@ -178,6 +178,16 @@
 					<div class="icon-trash"></div> Delete
 				</button>
 			{/if}
+
+			<button
+				class="btn btn-text"
+				on:click={() => {
+					navigator.clipboard.writeText(`https://ide.ryly.dev/view/${project.id}`)
+				}}
+			>
+				<div class="icon-copy"></div>
+				Copy Share Link
+			</button>
 		</div>
 
 		<div>
