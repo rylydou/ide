@@ -6,7 +6,11 @@ import { id, str, table } from './shared'
 export const group = table('group', {
 	id: id('id'),
 	name: str('name').notNull(),
-	secret: str('secret').default('').notNull().unique('group-secret'),
+	/**
+	 * Join code. `null` means the class is unjoinable — deliberately nullable rather than
+	 * empty-string, so the unique constraint doesn't collide across closed classes.
+	 */
+	secret: str('secret', { length: 6 }).unique('group-secret'),
 })
 
 

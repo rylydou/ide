@@ -4,7 +4,15 @@ import type { editor } from 'monaco-editor'
 // ----- Auth -----
 export const max_sessions_per_user = 3
 export const session_max_age_days = 30
-export const encryption_salt_rounds = 10
+/** argon2id parameters for `Bun.password` (OWASP-recommended baseline). */
+export const argon2 = {
+	algorithm: 'argon2id',
+	memoryCost: 19_456,
+	timeCost: 2,
+} as const
+
+/** Max total characters (html + css + js) accepted for a single project. */
+export const max_payload_length = 8_192
 export const default_email_domain = '@student.cislions.org'
 
 
@@ -151,7 +159,7 @@ export const monaco_options: editor.IStandaloneEditorConstructionOptions = {
 	},
 	renderLineHighlight: 'none',
 	colorDecorators: true,
-	defaultColorDecorators: true,
+	defaultColorDecorators: 'auto',
 	mouseWheelZoom: true,
 	suggestFontSize: 16,
 	suggestLineHeight: 28,

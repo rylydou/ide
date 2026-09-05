@@ -1,53 +1,78 @@
 <script lang="ts">
 	import { cfg } from '$lib'
-	import hotkeys from 'hotkeys-js'
-	import type { editor } from 'monaco-editor/esm/vs/editor/editor.api'
-	import { createEventDispatcher, onMount } from 'svelte'
+	import type { editor as monaco_editor } from 'monaco-editor'
+	import type { HTMLAttributes } from 'svelte/elements'
 
-	const dispatch = createEventDispatcher<{
-		load: void
-		change: void
-	}>()
+	type Props = Omit<HTMLAttributes<HTMLDivElement>, 'onload' | 'onchange'> & {
+		code: string
+		lang: string
+		is_dirty?: boolean
+		editor?: monaco_editor.IStandaloneCodeEditor | null
+		onload?: () => void
+		onchange?: () => void
+		/** Invoked when the user presses Ctrl/Cmd+S inside the editor. */
+		onsave?: () => void
+	}
 
-	export let code: string
-	export let lang: string
-	export let is_dirty = false
-	export let editor: editor.IStandaloneCodeEditor | null = null
+	let {
+		code,
+		lang,
+		is_dirty = $bindable(false),
+		editor = $bindable(null),
+		onload,
+		onchange,
+		onsave,
+		...rest
+	}: Props = $props()
 
-	let editor_container: HTMLDivElement
+	let container: HTMLDivElement
 
-	onMount(async () => {
-		await import('./monaco_worker')
-		const monaco = await import('monaco-editor/esm/vs/editor/editor.api')
+	$effect(() => {
+		let instance: monaco_editor.IStandaloneCodeEditor | undefined
+		let disposed = false
 
-		monaco.editor.defineTheme('zuhgy-dark', cfg.monaco_theme)
-		editor = monaco.editor.create(editor_container, {
-			...cfg.monaco_options,
-			value: code,
-			language: lang,
-		})
+		const setup = async () => {
+			await import('./monaco_worker')
+			const monaco = await import('monaco-editor')
+			if (disposed) return
 
-		editor.onDidLayoutChange((e) => {
-			dispatch('load')
-		})
+			monaco.editor.defineTheme('zuhgy-dark', cfg.monaco_theme)
+			instance = monaco.editor.create(container, {
+				...cfg.monaco_options,
+				value: code,
+				language: lang,
+			})
+			editor = instance
 
-		editor.onDidChangeModelContent((e) => {
-			is_dirty = true
-			dispatch('change')
-		})
+			instance.onDidLayoutChange(() => onload?.())
 
-		editor.addAction({
-			id: 'save',
-			label: 'Save',
-			keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
-			run: () => hotkeys.trigger('ctrl+s'),
-		})
+			instance.onDidChangeModelContent(() => {
+				is_dirty = true
+				onchange?.()
+			})
+
+			instance.addAction({
+				id: 'save',
+				label: 'Save',
+				keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+				run: () => onsave?.(),
+			})
+		}
+
+		setup()
+
+		return () => {
+			disposed = true
+			instance?.getModel()?.dispose()
+			instance?.dispose()
+			editor = null
+		}
 	})
 </script>
 
-<div bind:this={editor_container} class="code-editor" {...$$restProps}> </div>
+<div bind:this={container} class="code-editor" {...rest}></div>
 
-<style lang="scss">
+<style>
 	.code-editor {
 		height: 100%;
 	}

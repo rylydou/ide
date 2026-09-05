@@ -1,45 +1,39 @@
-import * as monaco from 'monaco-editor'
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
-import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'
-import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
-import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
-
-
 import { emmetHTML } from 'emmet-monaco-es'
+import * as monaco from 'monaco-editor'
+import { html, typescript } from 'monaco-editor'
+import css_worker from 'monaco-editor/languages/features/css/css.worker?worker'
+import html_worker from 'monaco-editor/languages/features/html/html.worker?worker'
+import ts_worker from 'monaco-editor/languages/features/typescript/ts.worker?worker'
+import editor_worker from 'monaco-editor/editor/editor.worker?worker'
 
 
-const dispose_emmet = emmetHTML(
-	monaco,
-	['html'],
-)
-
-
-// @ts-ignore
 self.MonacoEnvironment = {
-	getWorker(_: any, label: string) {
+	getWorker(_workerId: string, label: string) {
 		switch (label) {
 			case 'css':
 			case 'scss':
-				return new cssWorker()
+			case 'less':
+				return new css_worker()
 			case 'html':
-				return new htmlWorker()
+			case 'handlebars':
+			case 'razor':
+				return new html_worker()
 			case 'typescript':
 			case 'javascript':
-				return new tsWorker()
+				return new ts_worker()
 			default:
-				return new editorWorker()
+				return new editor_worker()
 		}
-	}
+	},
 }
 
-monaco.languages.html.htmlDefaults.setOptions({
-	// @ts-ignore
-	format: {
-		wrapLineLength: 80,
-	}
+emmetHTML(monaco, ['html'])
+
+html.htmlDefaults.setOptions({
+	format: { ...html.htmlDefaults.options.format!, wrapLineLength: 80 },
 })
 
-monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true)
-monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+typescript.typescriptDefaults.setEagerModelSync(true)
+typescript.typescriptDefaults.setCompilerOptions({
 	lib: ['DOM', 'DOM.Iterable'],
 })

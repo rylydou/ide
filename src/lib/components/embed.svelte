@@ -1,53 +1,50 @@
 <script lang="ts">
-	import { browser } from '$app/environment'
-	import { debounce } from '$lib'
+	import reset_css from '$lib/styles/reset.css?inline'
+	import { untrack } from 'svelte'
+	import type { HTMLIframeAttributes } from 'svelte/elements'
 
-	export let head = ''
-	export let body = ''
-	export let js = ''
-
-	let iframe: HTMLIFrameElement
-
-	const run_js = debounce(() => {
-		if (!browser) return
-		if (!iframe) return
-		const window = iframe.contentWindow
-		if (!window) return
-
-		try {
-			window.eval(js)
-		} catch {
-			console.warn('Failed to eval() user js.')
-		}
-	}, 1000)
-
-	$: {
-		if (iframe) {
-			const doc = iframe.contentDocument!
-			const head_element = doc.querySelector('head') as HTMLHeadElement
-			head_element.innerHTML = head
-		}
+	type Props = Omit<HTMLIframeAttributes, 'srcdoc' | 'sandbox'> & {
+		html?: string
+		css?: string
+		js?: string
+		/** How long to wait after the last edit before re-rendering, in ms. */
+		delay?: number
 	}
 
-	$: {
-		if (iframe) {
-			const doc = iframe.contentDocument!
-			const body_element = doc.querySelector('body') as HTMLBodyElement
-			body_element.innerHTML = body
+	let { html = '', css = '', js = '', delay = 1000, ...rest }: Props = $props()
 
-			for (const link of body_element.querySelectorAll('a')) {
-				link.setAttribute('target', '_blank')
-			}
+	// Written this way because Svelte parses `<style>`/`<script>` in the source
+	// textually — a literal tag here would end this component's script block.
+	const tag = (name: string, content: string) => `<${name}>${content}</${name}>`
 
-			run_js()
-		}
-	}
+	// A closing script tag inside user JS would otherwise terminate the block early.
+	const escape_script = (code: string) => code.replace(/<\/script/gi, '<\\/script')
 
-	$: {
-		if (iframe && js) {
-			run_js()
-		}
-	}
+	const build = (html: string, css: string, js: string) => [
+		'<!doctype html><html lang="en"><head>',
+		'<meta charset="UTF-8">',
+		'<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+		'<base target="_blank">',
+		tag('style', css.replace(`@import url('reset.css');`, reset_css)),
+		'</head><body>',
+		html,
+		tag('script', escape_script(js)),
+		'</body></html>',
+	].join('')
+
+	const next = $derived(build(html, css, js))
+
+	let srcdoc = $state(untrack(() => build(html, css, js)))
+
+	$effect(() => {
+		if (next === srcdoc) return
+		const timer = setTimeout(() => (srcdoc = next), delay)
+		return () => clearTimeout(timer)
+	})
 </script>
 
-<iframe bind:this={iframe} {...$$restProps}> </iframe>
+<!--
+	Deliberately no `allow-same-origin`: the preview runs student code, and without it
+	the iframe gets an opaque origin that cannot reach this document, its cookies, or storage.
+-->
+<iframe {srcdoc} sandbox="allow-scripts allow-popups allow-modals allow-forms" {...rest}></iframe>

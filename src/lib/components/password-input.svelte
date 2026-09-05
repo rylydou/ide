@@ -1,7 +1,12 @@
 <script lang="ts">
+	import type { HTMLInputAttributes } from 'svelte/elements'
 	import { Toggle } from '.'
 
-	export let reveal_password = false
+	type Props = Omit<HTMLInputAttributes, 'type'> & {
+		reveal_password?: boolean
+	}
+
+	let { reveal_password = $bindable(false), ...rest }: Props = $props()
 </script>
 
 <div class="input-group">
@@ -9,14 +14,15 @@
 		type={reveal_password ? 'text' : 'password'}
 		class="password"
 		placeholder={reveal_password ? 'Not a secret anymore' : "It's a secret to everybody"}
-		{...$$restProps}
+		{...rest}
 	/>
 
 	<Toggle
 		bind:value={reveal_password}
 		data-tooltip={reveal_password ? 'Hide password' : 'Show password'}
+		aria-label={reveal_password ? 'Hide password' : 'Show password'}
 	>
-		<div slot="on" class="icon-unlock" />
-		<div slot="off" class="icon-lock" />
+		{#snippet on()}<div class="icon-unlock"></div>{/snippet}
+		{#snippet off()}<div class="icon-lock"></div>{/snippet}
 	</Toggle>
 </div>

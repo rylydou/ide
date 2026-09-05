@@ -1,16 +1,17 @@
+import { db, random_name, schema, url_id } from '$lib/server'
 import { redirect } from '@sveltejs/kit'
 import type { PageServerLoad } from './$types'
-import { db, random_name, schema } from '$lib/server'
 
 
 export const load = (async ({ locals }) => {
-	if (!locals.session) throw redirect(303, '/login')
+	if (!locals.session) redirect(303, '/login')
 	const { user } = locals.session
 
-	const project = (await db.insert(schema.project).values({
+	const [project] = await db.insert(schema.project).values({
 		author_id: user.id,
 		name: random_name(),
-	}).returning())[0]
+		share_slug: url_id(15),
+	}).returning()
 
-	redirect(303, `/project/${project.id}`)
+	redirect(303, `/project/${project!.id}`)
 }) satisfies PageServerLoad

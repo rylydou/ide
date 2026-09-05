@@ -1,21 +1,22 @@
 import { db, fix_ambiguous, human_id, schema } from '$lib/server'
 import { error, redirect, type Actions } from '@sveltejs/kit'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import type { PageServerLoad } from './$types'
 
 
+const group_id_schema = z.coerce.number().int('id must be a whole number')
+
+
 export const load = (async ({ locals, params }) => {
-	if (!locals.session) throw redirect(303, '/login')
+	if (!locals.session) redirect(303, '/login')
 	const { user } = locals.session
 
-	const group_id_schema = z.number({ coerce: true }).int('id must be a whole number')
-	const group_id_result = await group_id_schema.safeParseAsync(params.id)
-	if (!group_id_result.success) throw error(400)
-	const group_id = group_id_result.data
+	const group_id_result = group_id_schema.safeParse(params.id)
+	if (!group_id_result.success) error(400)
 
 	const group = await db.query.group.findFirst({
-		where: eq(schema.project.id, group_id),
+		where: eq(schema.group.id, group_id_result.data),
 		with: {
 			users_to_groups: {
 				columns: {
@@ -36,67 +37,85 @@ export const load = (async ({ locals, params }) => {
 									name: true,
 									created_at: true,
 									updated_at: true,
-								}
-							}
-						}
+								},
+							},
+						},
 					},
 				},
 			},
 		},
 	})
 
-	if (!group) throw error(404, 'Class not found')
+	if (!group) error(404, 'Class not found')
 
-	const group_data = {
-		id: group.id,
-		name: group.name,
-		secret: undefined as (string | undefined),
-		users: group.users_to_groups.map(({ user }) => user),
-	}
+	const users = group.users_to_groups.map(({ user }) => user)
 
-	if (!group_data.users.some(u => u.id === user.id)) throw error(404, 'Class not found')
-
-
-	if (user.is_admin) {
-		group_data.secret = group.secret
-	}
+	// Membership is the access check — don't leak the existence of other classes.
+	if (!users.some((u) => u.id === user.id)) error(404, 'Class not found')
 
 	return {
-		group: group_data,
+		group: {
+			id: group.id,
+			name: group.name,
+			// The join code is an invite credential; only admins may see it.
+			secret: user.is_admin ? group.secret : null,
+			users,
+		},
 	}
 }) satisfies PageServerLoad
 
 
+const update_schema = z.object({
+	name: z.string().trim().min(1, 'A class name is required').max(60),
+	secret: z.string().transform(fix_ambiguous),
+})
+
+
 export const actions: Actions = {
-	default: async ({ request, locals, params }) => {
-		if (!locals.session) throw redirect(303, '/login')
+	/**
+	 * Note both of these are *named* actions. A `+server.ts` on this route would take
+	 * precedence over a default action for POST, which is how class editing silently
+	 * broke before — the form's POST was being handled as a JSON API request.
+	 */
+	update: async ({ request, locals, params }) => {
+		if (!locals.session) redirect(303, '/login')
 		const { user } = locals.session
-		if (!user.is_admin) throw error(401, 'You have to be an admin to update a class.')
+		if (!user.is_admin) error(403, 'You have to be an admin to update a class.')
 
-		const group_id_schema = z.number({ coerce: true }).int('id must be a whole number')
-		const group_id_result = await group_id_schema.safeParseAsync(params.id)
-		if (!group_id_result.success) throw error(400)
-		const group_id = group_id_result.data
+		const group_id_result = group_id_schema.safeParse(params.id)
+		if (!group_id_result.success) error(400)
 
-		const update_schema = z.object({
-			name: z.string(),
-			secret: z.string().toLowerCase().transform((str) => fix_ambiguous(str)),
-		})
-
-		const form_data = await request.formData()
-		const data_result = await update_schema.safeParseAsync(Object.fromEntries(form_data.entries()))
-		if (!data_result.success) throw error(400, data_result.error.message)
+		const form_data = Object.fromEntries((await request.formData()).entries())
+		const data_result = update_schema.safeParse(form_data)
+		if (!data_result.success) error(400, z.prettifyError(data_result.error))
 		const data = data_result.data
 
-		if (data.secret.startsWith('(')) {
-			data.secret = human_id(6)
-		}
+		// The "randomize" button submits a placeholder; an empty field closes the class.
+		const secret = form_data.secret === '(randomize join code)'
+			? human_id(6)
+			: data.secret || null
 
 		await db.update(schema.group).set({
 			name: data.name,
-			secret: data.secret,
-		}).where(eq(schema.group.id, group_id))
+			secret,
+		}).where(eq(schema.group.id, group_id_result.data))
 
 		return {}
+	},
+
+	/** Remove the current user from this class. */
+	leave: async ({ locals, params }) => {
+		if (!locals.session) redirect(303, '/login')
+		const { user } = locals.session
+
+		const group_id_result = group_id_schema.safeParse(params.id)
+		if (!group_id_result.success) error(400)
+
+		await db.delete(schema.users_to_groups).where(and(
+			eq(schema.users_to_groups.user_id, user.id),
+			eq(schema.users_to_groups.group_id, group_id_result.data),
+		))
+
+		redirect(303, '/')
 	},
 }

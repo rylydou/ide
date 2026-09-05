@@ -1,47 +1,43 @@
 import { db, schema } from '$lib/server'
 import type { Handle } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
-import { z } from 'zod'
 
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.session = undefined
 
-	const session_token_schema = z.string().length(30, 'invalid session token length')
-	const session_token_result = await session_token_schema.safeParseAsync(event.cookies.get('session_token'))
-	if (!session_token_result.success) {
-		event.cookies.delete('session_token', { path: '/' })
+	const clear = () => event.cookies.delete('session_token', { path: '/' })
+
+	const session_token = event.cookies.get('session_token')
+	if (session_token?.length !== 30) {
+		if (session_token !== undefined) clear()
 		return await resolve(event)
 	}
 
-	const session_token = session_token_result.data
-
-	// find session
 	const session = await db.query.session.findFirst({
 		where: eq(schema.session.token, session_token),
 		with: {
 			user: {
-				columns: {
-					password: false,
-				},
+				columns: { password: false },
 			},
 		},
 	})
+
 	if (!session) {
+		clear()
 		return await resolve(event)
 	}
 
-	// check if session is expired
 	if (session.expires < new Date()) {
+		clear()
+		await db.delete(schema.session).where(eq(schema.session.token, session_token))
 		return await resolve(event)
 	}
 
 	event.locals.session = {
 		token: session.token,
 		expires: session.expires,
-		user: {
-			...session.user,
-		},
+		user: session.user,
 	}
 
 	return await resolve(event)

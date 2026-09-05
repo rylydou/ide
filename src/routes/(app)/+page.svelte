@@ -1,23 +1,23 @@
 <script lang="ts">
-	import { page } from '$app/stores'
 	import { greet } from '$lib'
 	import { GroupCard, ProjectCard, SearchInput } from '$lib/components'
 	import { flip } from 'svelte/animate'
 	import { expoOut as easing } from 'svelte/easing'
 	import { crossfade, scale } from 'svelte/transition'
-	import type { PageData } from './$types'
+	import type { PageProps } from './$types'
 
-	export let data: PageData
+	let { data }: PageProps = $props()
 
-	const greeting = greet($page.data.session!)
+	const greeting = $derived(greet(data.session))
 
-	let projects_filter = ''
+	let projects_filter = $state('')
 
-	$: filtered_projects = projects_filter
-		? data.projects.filter((project) => {
-				return project.name.toLowerCase().includes(projects_filter.toLowerCase())
-			})
-		: data.projects
+	const filtered_projects = $derived(
+		projects_filter
+			? data.projects.filter((project) =>
+				project.name.toLowerCase().includes(projects_filter.toLowerCase()))
+			: data.projects,
+	)
 
 	const [send, receive] = crossfade({
 		duration: 200,
@@ -40,15 +40,15 @@
 			{#each data.groups as group (group.id)}
 				<GroupCard {group} />
 			{/each}
-			{#if $page.data.session?.user.is_admin}
+
+			{#if data.session.user.is_admin}
 				<div class="card-group">
 					<div class="card card-new">
 						<a class="card-link" href="/join">Join class</a>
 						<span>Join a class</span>
 					</div>
 					<div class="card card-new">
-						<a class="card-link" href="/class/new" data-sveltekit-preload-data="off">Create class</a
-						>
+						<a class="card-link" href="/class/new" data-sveltekit-preload-data="off">Create class</a>
 						<span>Create a class</span>
 					</div>
 				</div>
@@ -65,11 +65,12 @@
 		<header>
 			<SearchInput placeholder="Search your projects..." bind:value={projects_filter} />
 			<div class="buttons">
-				<a class="btn btn-accent btn-text" href="/project/new" data-sveltekit-preload-data="off"
-					>New Project</a
-				>
+				<a class="btn btn-accent btn-text" href="/project/new" data-sveltekit-preload-data="off">
+					New Project
+				</a>
 			</div>
 		</header>
+
 		<ul class="sec-content list-grid">
 			{#each filtered_projects as project (project.id)}
 				<li

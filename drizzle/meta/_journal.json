@@ -1,1 +1,13 @@
-{"version":"5","dialect":"pg","entries":[{"idx":0,"version":"5","when":1705373353763,"tag":"0000_freezing_energizer","breakpoints":true},{"idx":1,"version":"5","when":1705806802477,"tag":"0001_empty_spyke","breakpoints":true}]}
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788554621105,
+      "tag": "0000_dizzy_roughhouse",
+      "breakpoints": true
+    }
+  ]
+}

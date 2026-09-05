@@ -1,15 +1,13 @@
-import type { Config } from 'drizzle-kit'
-import * as dotenv from 'dotenv'
-dotenv.config()
+import { defineConfig } from 'drizzle-kit'
 
 
-export default {
-	schema: 'src/lib/server/db/schema/*',
+export default defineConfig({
+	dialect: 'postgresql',
+	schema: './src/lib/server/db/schema',
 	out: './drizzle',
-	driver: 'turso',
 	dbCredentials: {
-		url: process.env.DB_URL!,
-		authToken: process.env.DB_TOKEN!,
+		url: process.env.DATABASE_URL!,
 	},
-	tablesFilter: ['builder_'],
-} satisfies Config
+	strict: true,
+	verbose: true,
+})

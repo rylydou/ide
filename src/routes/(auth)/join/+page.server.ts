@@ -6,55 +6,43 @@ import { z } from 'zod'
 import type { Actions } from './$types'
 
 
-export type FormResponse = {
-	status: 'ok'
-} | {
-	status: 'failed'
-	message: string
-}
+const form_schema = z.object({
+	secret: z.string().transform(fix_ambiguous).refine((s) => s.length >= 4, 'Join code is too short'),
+})
 
 
 export const actions: Actions = {
 	default: async ({ request, locals, cookies }) => {
-		const form_schema = z.object({
-			secret: z.string().min(4).toLowerCase().transform((str) => fix_ambiguous(str)),
-		})
-
-		const form_data = await request.formData()
-		const result = await form_schema.safeParseAsync(Object.fromEntries(form_data.entries()))
+		const result = form_schema.safeParse(Object.fromEntries(await request.formData()))
 
 		if (!result.success) {
-			return fail(400, {
-				message: 'Invalid schema format',
-			})
+			return fail(400, { message: result.error.issues[0]!.message })
 		}
 
-		const data = result.data
+		const { secret } = result.data
 
 		const group = await db.query.group.findFirst({
-			where: eq(schema.group.secret, data.secret),
-			columns: { id: true, }
+			where: eq(schema.group.secret, secret),
+			columns: { id: true },
 		})
 
-		console.log(data.secret)
-
 		if (!group) {
-			return fail(401, {
-				message: 'Invalid secret code',
-			})
+			return fail(401, { message: 'Invalid secret code' })
 		}
 
 		const session = locals.session
 		if (!session) {
-			cookies.set('join_secret', data.secret, {
+			cookies.set('join_secret', secret, {
 				path: '/',
+				httpOnly: true,
 				secure: true,
 				sameSite: 'lax',
+				maxAge: 60 * 30,
 			})
-			throw redirect(303, `/register`)
+			redirect(303, '/register')
 		}
 
-		await join_group(data.secret, session.user.id)
-		throw redirect(303, '/')
+		await join_group(secret, session.user.id)
+		redirect(303, '/')
 	},
 }

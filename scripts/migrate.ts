@@ -1,13 +1,15 @@
-import dotenv from 'dotenv'
-import { drizzle, } from "drizzle-orm/libsql"
-import { migrate } from "drizzle-orm/libsql/migrator"
-import { db_client } from '../src/lib/server/db/db_client'
-dotenv.config()
+import { drizzle } from 'drizzle-orm/bun-sql'
+import { migrate } from 'drizzle-orm/bun-sql/migrator'
 
 
-console.log('connecting drizzle orm...')
-const db = drizzle(db_client)
+const url = Bun.env.DATABASE_URL
+if (!url) throw new Error('DATABASE_URL is not set')
 
-console.log('migrating... (wish me luck)')
-await migrate(db, { migrationsFolder: 'drizzle', })
-console.log('done!')
+const sql = new Bun.SQL(url)
+const db = drizzle(sql)
+
+console.log('migrating...')
+await migrate(db, { migrationsFolder: 'drizzle' })
+console.log('done')
+
+await sql.close()

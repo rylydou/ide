@@ -4,10 +4,10 @@ import { bool, id, str, table, timestamp } from './shared'
 
 
 export const user = table('user', {
-	id: id('id').primaryKey(),
-	email: str('email').notNull(),
+	id: id('id'),
+	email: str('email').notNull().unique('user-email'),
 	name: str('name').notNull(),
-	password: str('password', { length: 60 }).notNull(),
+	password: str('password').notNull(),
 	created_at: timestamp('created_at').notNull(),
 	is_admin: bool('is_admin').default(false).notNull(),
 })
