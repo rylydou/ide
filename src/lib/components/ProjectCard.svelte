@@ -8,5 +8,5 @@
 <article class="card project-card">
 	<a class="card-link" href="/project/{project.id}">Open {project.name}</a>
 	<h3>{project.name}</h3>
-	<span>Updated <Timestamp date={project.updated_at} /></span>
+	<span>Updated <Timestamp date={project.updatedAt} /></span>
 </article>

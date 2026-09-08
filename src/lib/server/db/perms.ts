@@ -1,18 +1,16 @@
-import { eq } from 'drizzle-orm'
-import { db, schema } from '.'
+import { db } from '.'
 
 
-/** @returns true if users are share similar groups */
-export const is_users_mutuals = async (user_id_a: number, user_id_b: number) => {
-	const user_groups = (await db.query.users_to_groups.findMany({
-		where: eq(schema.users_to_groups.user_id, user_id_a),
-		columns: { group_id: true, },
-	})).map(({ group_id }) => group_id)
+/** @returns true if the two users share at least one class. */
+export const isUsersMutuals = async (userIdA: number, userIdB: number) => {
+	// `groups` reaches through the users_to_groups junction — see ./relations.ts
+	const groupIds = async (userId: number) => (await db.query.group.findMany({
+		where: { users: { id: userId } },
+		columns: { id: true },
+	})).map(({ id }) => id)
 
-	const author_groups = (await db.query.users_to_groups.findMany({
-		where: eq(schema.users_to_groups.user_id, user_id_b),
-		columns: { group_id: true, },
-	})).map(({ group_id }) => group_id)
+	const [a, b] = await Promise.all([groupIds(userIdA), groupIds(userIdB)])
+	const shared = new Set(b)
 
-	return user_groups.some((g) => author_groups.includes(g))
+	return a.some((groupId) => shared.has(groupId))
 }

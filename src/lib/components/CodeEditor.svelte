@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { cfg } from '$lib'
-	import type { editor as monaco_editor } from 'monaco-editor'
+	import type { editor as monacoEditor } from 'monaco-editor'
 	import type { HTMLAttributes } from 'svelte/elements'
 
 	type Props = Omit<HTMLAttributes<HTMLDivElement>, 'onload' | 'onchange'> & {
 		code: string
 		lang: string
-		is_dirty?: boolean
-		editor?: monaco_editor.IStandaloneCodeEditor | null
+		isDirty?: boolean
+		editor?: monacoEditor.IStandaloneCodeEditor | null
 		onload?: () => void
 		onchange?: () => void
 		/** Invoked when the user presses Ctrl/Cmd+S inside the editor. */
@@ -17,7 +17,7 @@
 	let {
 		code,
 		lang,
-		is_dirty = $bindable(false),
+		isDirty = $bindable(false),
 		editor = $bindable(null),
 		onload,
 		onchange,
@@ -28,17 +28,17 @@
 	let container: HTMLDivElement
 
 	$effect(() => {
-		let instance: monaco_editor.IStandaloneCodeEditor | undefined
+		let instance: monacoEditor.IStandaloneCodeEditor | undefined
 		let disposed = false
 
 		const setup = async () => {
-			await import('./monaco_worker')
+			await import('./monacoWorker')
 			const monaco = await import('monaco-editor')
 			if (disposed) return
 
-			monaco.editor.defineTheme('zuhgy-dark', cfg.monaco_theme)
+			monaco.editor.defineTheme('zuhgy-dark', cfg.monacoTheme)
 			instance = monaco.editor.create(container, {
-				...cfg.monaco_options,
+				...cfg.monacoOptions,
 				value: code,
 				language: lang,
 			})
@@ -47,7 +47,7 @@
 			instance.onDidLayoutChange(() => onload?.())
 
 			instance.onDidChangeModelContent(() => {
-				is_dirty = true
+				isDirty = true
 				onchange?.()
 			})
 

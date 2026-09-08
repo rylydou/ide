@@ -67,6 +67,17 @@ newer ones so no account or project is lost.
 Sessions are not carried over, so everyone signs in once more. Passwords are: existing bcrypt
 hashes keep working and are re-hashed to argon2id on next login.
 
+## Conventions
+
+TypeScript identifiers are `camelCase`; database columns are `snake_case`, derived automatically
+from the schema keys by `pgTableCreator(..., 'snake_case')` in `src/lib/server/db/schema/shared.ts`.
+Nothing in the schema spells a column name out by hand.
+
+Relations live in one place — `src/lib/server/db/relations.ts` — using Drizzle's Relations v2
+`defineRelations`. `group.users` and `user.groups` reach *through* the `users_to_groups` junction,
+so queries never mention it. Filters use the v2 object syntax (`where: { authorId: user.id }`)
+rather than `eq(...)`, and a class's access check is expressed as a filter on the related users.
+
 ## Notes
 
 - The live preview runs student code in an iframe with `sandbox="allow-scripts …"` and **no**

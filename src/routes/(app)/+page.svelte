@@ -10,14 +10,14 @@
 
 	const greeting = $derived(greet(data.session))
 
-	let projects_filter = $state('')
+	let projectsFilter = $state('')
 
-	const filtered_projects = $derived(
-		projects_filter
-			? data.projects.filter((project) =>
-				project.name.toLowerCase().includes(projects_filter.toLowerCase()))
-			: data.projects,
-	)
+	const filteredProjects = $derived.by(() => {
+		if (!projectsFilter) return data.projects
+
+		const needle = projectsFilter.toLowerCase()
+		return data.projects.filter((project) => project.name.toLowerCase().includes(needle))
+	})
 
 	const [send, receive] = crossfade({
 		duration: 200,
@@ -41,7 +41,7 @@
 				<GroupCard {group} />
 			{/each}
 
-			{#if data.session.user.is_admin}
+			{#if data.session.user.isAdmin}
 				<div class="card-group">
 					<div class="card card-new">
 						<a class="card-link" href="/join">Join class</a>
@@ -63,7 +63,7 @@
 
 	<section>
 		<header>
-			<SearchInput placeholder="Search your projects..." bind:value={projects_filter} />
+			<SearchInput placeholder="Search your projects..." bind:value={projectsFilter} />
 			<div class="buttons">
 				<a class="btn btn-accent btn-text" href="/project/new" data-sveltekit-preload-data="off">
 					New Project
@@ -72,7 +72,7 @@
 		</header>
 
 		<ul class="sec-content list-grid">
-			{#each filtered_projects as project (project.id)}
+			{#each filteredProjects as project (project.id)}
 				<li
 					animate:flip={{ duration: 200, easing }}
 					out:send={{ key: project.id }}
@@ -81,7 +81,7 @@
 					<ProjectCard {project} />
 				</li>
 			{:else}
-				<li>{projects_filter ? 'No results' : 'Get started by clicking "New Project"'}</li>
+				<li>{projectsFilter ? 'No results' : 'Get started by clicking "New Project"'}</li>
 			{/each}
 		</ul>
 	</section>

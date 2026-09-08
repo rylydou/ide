@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { beforeNavigate, goto } from '$app/navigation'
 	import { page } from '$app/state'
-	import { cfg, load_project } from '$lib'
+	import { cfg, loadProject } from '$lib'
 	import { CodeEditor, Embed, Timestamp } from '$lib/components'
-	import { auto_size, hotkey } from '$lib/directives'
+	import { autoSize, hotkey } from '$lib/directives'
 	import type { editor } from 'monaco-editor'
 	import { untrack } from 'svelte'
 	import { Pane, Splitpanes } from 'svelte-splitpanes'
@@ -15,31 +15,31 @@
 	// A local, mutable copy: saving a fork rewrites the id and author in place.
 	let project = $state(untrack(() => data.project))
 
-	const initial = load_project(project.data)
-	let html_code = $state(initial.html_code)
-	let css_code = $state(initial.css_code)
-	let js_code = $state(initial.js_code)
+	const initial = loadProject(project.data)
+	let htmlCode = $state(initial.htmlCode)
+	let cssCode = $state(initial.cssCode)
+	let jsCode = $state(initial.jsCode)
 
-	let is_author = $state(project.author_id === session.user.id)
-	let is_saving = $state(false)
-	let is_dirty = $state(false)
-	let has_edited = $state(false)
-	let delete_confirm = $state(false)
-	let editor_tab = $state<'css' | 'js'>('css')
-	let is_fullscreen = $state(false)
+	let isAuthor = $state(project.authorId === session.user.id)
+	let isSaving = $state(false)
+	let isDirty = $state(false)
+	let hasEdited = $state(false)
+	let deleteConfirm = $state(false)
+	let editorTab = $state<'css' | 'js'>('css')
+	let isFullscreen = $state(false)
 
-	let html_editor = $state<editor.IStandaloneCodeEditor | null>(null)
-	let css_editor = $state<editor.IStandaloneCodeEditor | null>(null)
-	let js_editor = $state<editor.IStandaloneCodeEditor | null>(null)
+	let htmlEditor = $state<editor.IStandaloneCodeEditor | null>(null)
+	let cssEditor = $state<editor.IStandaloneCodeEditor | null>(null)
+	let jsEditor = $state<editor.IStandaloneCodeEditor | null>(null)
 
-	const total_length = $derived(html_code.length + css_code.length + js_code.length)
-	const is_too_long = $derived(total_length > cfg.max_payload_length)
-	const can_save = $derived(!is_saving && !is_too_long && (is_dirty || !is_author))
+	const totalLength = $derived(htmlCode.length + cssCode.length + jsCode.length)
+	const isTooLong = $derived(totalLength > cfg.maxPayloadLength)
+	const canSave = $derived(!isSaving && !isTooLong && (isDirty || !isAuthor))
 
-	const share_url = $derived(`${page.url.origin}/view/${project.share_slug}`)
+	const shareUrl = $derived(`${page.url.origin}/view/${project.shareSlug}`)
 
 	$effect(() => {
-		if (!is_dirty) return
+		if (!isDirty) return
 
 		const warn = (event: BeforeUnloadEvent) => event.preventDefault()
 		window.addEventListener('beforeunload', warn)
@@ -47,47 +47,47 @@
 	})
 
 	beforeNavigate(({ cancel }) => {
-		if (!is_dirty) return
+		if (!isDirty) return
 		if (!confirm('Are you sure you want to leave? All unsaved changes will be lost.')) cancel()
 	})
 
-	const save_project = async () => {
-		if (!can_save) return
+	const saveProject = async () => {
+		if (!canSave) return
 
-		is_saving = true
+		isSaving = true
 
 		const response = await fetch(`/project/${project.id}`, {
 			method: 'PUT',
 			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({
 				name: project.name,
-				data: { html_code, css_code, js_code },
+				data: { htmlCode, cssCode, jsCode },
 			}),
 		})
 
-		is_saving = false
+		isSaving = false
 
 		if (!response.ok) {
 			window.alert(`Could not save: ${await response.text()}`)
 			return
 		}
 
-		is_dirty = false
-		has_edited = true
-		project.updated_at = new Date()
+		isDirty = false
+		hasEdited = true
+		project.updatedAt = new Date()
 
-		const { forked_to } = await response.json() as { forked_to?: number }
-		if (forked_to) {
-			project.id = forked_to
+		const { forkedTo } = await response.json() as { forkedTo?: number }
+		if (forkedTo) {
+			project.id = forkedTo
 			project.author = session.user
-			project.author_id = session.user.id
-			is_author = true
+			project.authorId = session.user.id
+			isAuthor = true
 			// The fork lives at a new URL; swap it in without a navigation.
 			history.replaceState(history.state, '', `/project/${project.id}`)
 		}
 	}
 
-	const delete_project = async () => {
+	const deleteProject = async () => {
 		const response = await fetch(`/project/${project.id}`, { method: 'DELETE' })
 		if (response.ok) await goto('/')
 	}
@@ -99,25 +99,25 @@
 
 <div
 	class="project-layout"
-	use:hotkey={{ key: 's', mod: true, handler: save_project }}
+	use:hotkey={{ key: 's', mod: true, handler: saveProject }}
 >
 	<header>
 		<div class="header-start">
 			<a class="btn btn-text" href="/"><div class="icon-home"></div> Home</a>
 
-			{#if is_author || session.user.is_admin}
+			{#if isAuthor || session.user.isAdmin}
 				<button
 					class="btn btn-text"
-					class:btn-destructive={delete_confirm}
-					onpointerleave={() => (delete_confirm = false)}
-					onclick={() => (delete_confirm ? delete_project() : (delete_confirm = true))}
+					class:btn-destructive={deleteConfirm}
+					onpointerleave={() => (deleteConfirm = false)}
+					onclick={() => (deleteConfirm ? deleteProject() : (deleteConfirm = true))}
 				>
 					<div class="icon-trash"></div>
-					{delete_confirm ? 'Really delete?' : 'Delete'}
+					{deleteConfirm ? 'Really delete?' : 'Delete'}
 				</button>
 			{/if}
 
-			<button class="btn btn-text" onclick={() => navigator.clipboard.writeText(share_url)}>
+			<button class="btn btn-text" onclick={() => navigator.clipboard.writeText(shareUrl)}>
 				<div class="icon-copy"></div> Copy Share Link
 			</button>
 		</div>
@@ -132,42 +132,42 @@
 				spellcheck="false"
 				maxlength="40"
 				bind:value={project.name}
-				use:auto_size
-				oninput={() => (is_dirty = true)}
+				use:autoSize
+				oninput={() => (isDirty = true)}
 			/>
 			<h2>by {project.author.name}</h2>
 		</div>
 
 		<div class="header-end">
-			{#if is_too_long}
+			{#if isTooLong}
 				<span class="too-long" role="alert">
-					{total_length.toLocaleString()} / {cfg.max_payload_length.toLocaleString()} characters —
+					{totalLength.toLocaleString()} / {cfg.maxPayloadLength.toLocaleString()} characters —
 					too long to save
 				</span>
 			{:else}
 				<span>
-					{has_edited ? 'Last saved' : 'Last updated'}
-					<Timestamp date={project.updated_at} />
+					{hasEdited ? 'Last saved' : 'Last updated'}
+					<Timestamp date={project.updatedAt} />
 				</span>
 			{/if}
 
 			<button
 				class="btn btn-text btn-save btn-accent"
-				class:hidden={!is_saving && is_author && !is_dirty}
-				disabled={!can_save}
-				onclick={save_project}
+				class:hidden={!isSaving && isAuthor && !isDirty}
+				disabled={!canSave}
+				onclick={saveProject}
 			>
-				{#if is_author}
-					{#if is_saving}
+				{#if isAuthor}
+					{#if isSaving}
 						Saving...
 					{:else}
 						<div class="icon-upload"></div> Save
 					{/if}
-				{:else if is_saving}
+				{:else if isSaving}
 					Forking...
 				{:else}
 					<div class="icon-copy"></div>
-					{is_dirty ? 'Fork*' : 'Fork'}
+					{isDirty ? 'Fork*' : 'Fork'}
 				{/if}
 			</button>
 		</div>
@@ -186,14 +186,14 @@
 						</div>
 						<div class="panel-content">
 							<CodeEditor
-								bind:editor={html_editor}
-								code={html_code}
+								bind:editor={htmlEditor}
+								code={htmlCode}
 								lang="html"
 								onchange={() => {
-									html_code = html_editor?.getValue() ?? html_code
-									is_dirty = true
+									htmlCode = htmlEditor?.getValue() ?? htmlCode
+									isDirty = true
 								}}
-								onsave={save_project}
+								onsave={saveProject}
 							/>
 						</div>
 					</div>
@@ -205,40 +205,40 @@
 							<div class="panel-tabs">
 								<button
 									class="panel-tab"
-									aria-current={editor_tab === 'css'}
-									onclick={() => (editor_tab = 'css')}
+									aria-current={editorTab === 'css'}
+									onclick={() => (editorTab = 'css')}
 								>CSS</button>
 								<button
 									class="panel-tab"
-									aria-current={editor_tab === 'js'}
-									onclick={() => (editor_tab = 'js')}
+									aria-current={editorTab === 'js'}
+									onclick={() => (editorTab = 'js')}
 								>JS</button>
 							</div>
 							<div class="panel-header-content"></div>
 						</div>
 						<div class="panel-content">
-							<div class="editor-slot" hidden={editor_tab !== 'css'}>
+							<div class="editor-slot" hidden={editorTab !== 'css'}>
 								<CodeEditor
-									bind:editor={css_editor}
-									code={css_code}
+									bind:editor={cssEditor}
+									code={cssCode}
 									lang="css"
 									onchange={() => {
-										css_code = css_editor?.getValue() ?? css_code
-										is_dirty = true
+										cssCode = cssEditor?.getValue() ?? cssCode
+										isDirty = true
 									}}
-									onsave={save_project}
+									onsave={saveProject}
 								/>
 							</div>
-							<div class="editor-slot" hidden={editor_tab !== 'js'}>
+							<div class="editor-slot" hidden={editorTab !== 'js'}>
 								<CodeEditor
-									bind:editor={js_editor}
-									code={js_code}
+									bind:editor={jsEditor}
+									code={jsCode}
 									lang="javascript"
 									onchange={() => {
-										js_code = js_editor?.getValue() ?? js_code
-										is_dirty = true
+										jsCode = jsEditor?.getValue() ?? jsCode
+										isDirty = true
 									}}
-									onsave={save_project}
+									onsave={saveProject}
 								/>
 							</div>
 						</div>
@@ -248,7 +248,7 @@
 		</Pane>
 
 		<Pane class="browser">
-			<div class="panel" class:fullscreen={is_fullscreen}>
+			<div class="panel" class:fullscreen={isFullscreen}>
 				<div class="panel-header">
 					<div class="panel-tabs">
 						<button class="panel-tab" aria-current="true">Web Browser</button>
@@ -256,18 +256,18 @@
 					<div class="panel-header-content">
 						<button
 							class="btn btn-flat"
-							aria-label={is_fullscreen ? 'Exit fullscreen preview' : 'Fullscreen preview'}
-							onclick={() => (is_fullscreen = !is_fullscreen)}
+							aria-label={isFullscreen ? 'Exit fullscreen preview' : 'Fullscreen preview'}
+							onclick={() => (isFullscreen = !isFullscreen)}
 						>
-							<div class={is_fullscreen ? 'icon-fullscreen_exit' : 'icon-fullscreen'}></div>
+							<div class={isFullscreen ? 'icon-fullscreen_exit' : 'icon-fullscreen'}></div>
 						</button>
 					</div>
 				</div>
 				<div class="panel-content panel-content-preview">
 					<Embed
-						html={html_code}
-						css={css_code}
-						js={js_code}
+						html={htmlCode}
+						css={cssCode}
+						js={jsCode}
 						title="Browser preview of &quot;{project.name}&quot; by {project.author.name}"
 						class="preview"
 					/>

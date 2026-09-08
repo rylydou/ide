@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/private'
 import { drizzle } from 'drizzle-orm/bun-sql'
-import * as schema from './schema'
+import { relations } from './relations'
 
 
 export * from './perms'
@@ -15,7 +15,8 @@ const connect = () => {
 	if (!env.DATABASE_URL) throw new Error('DATABASE_URL is not set')
 
 	// Native Bun Postgres client — no `pg` or `postgres.js` driver in the dependency tree.
-	return drizzle(new Bun.SQL(env.DATABASE_URL), { schema })
+	// `relations` carries the tables too, so there is no separate `schema` option in v2.
+	return drizzle({ client: new Bun.SQL(env.DATABASE_URL), relations })
 }
 
 let instance: Database | undefined

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { PasswordInput } from '$lib/components'
 	import { enhance } from '$app/forms'
-	import { create_form } from '$lib/form.svelte'
+	import { createForm } from '$lib/form.svelte'
 
-	const form = create_form()
+	const form = createForm()
 </script>
 
 <svelte:head>
@@ -37,7 +37,7 @@
 			<PasswordInput name="password" autocomplete="new-password" minlength={8} />
 		</label>
 
-		<button type="submit" class="btn" disabled={form.is_waiting}>Register</button>
+		<button type="submit" class="btn" disabled={form.isWaiting}>Register</button>
 
 		<div class="message">{form.message}</div>
 	</form>

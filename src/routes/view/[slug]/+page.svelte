@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { load_project } from '$lib'
+	import { loadProject } from '$lib'
 	import { Embed } from '$lib/components'
 	import type { PageProps } from './$types'
 
 	let { data }: PageProps = $props()
 
 	const project = $derived(data.project)
-	const code = $derived(load_project(project.data))
+	const code = $derived(loadProject(project.data))
 </script>
 
 <svelte:head>
@@ -14,9 +14,9 @@
 </svelte:head>
 
 <Embed
-	html={code.html_code}
-	css={code.css_code}
-	js={code.js_code}
+	html={code.htmlCode}
+	css={code.cssCode}
+	js={code.jsCode}
 	title="Browser preview of &quot;{project.name}&quot; by {project.author.name}"
 	class="standalone-preview"
 />

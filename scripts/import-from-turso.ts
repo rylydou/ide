@@ -13,11 +13,12 @@
  * a row here would orphan that user's projects and class memberships.
  */
 
-import { createClient } from '@libsql/client'
 import { sql as raw } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sql'
+import { createClient } from '@libsql/client'
+import type { ProjectData } from '../src/lib/projectData'
 import * as schema from '../src/lib/server/db/schema'
-import { url_id } from '../src/lib/server/nanoid'
+import { urlId } from '../src/lib/server/nanoid'
 
 
 const fix = Bun.argv.includes('--fix')
@@ -28,10 +29,23 @@ if (!DATABASE_URL) throw new Error('DATABASE_URL (the new Postgres database) is 
 
 const turso = createClient({ url: DB_URL, authToken: DB_TOKEN })
 const pg = new Bun.SQL(DATABASE_URL)
-const db = drizzle(pg, { schema })
+const db = drizzle({ client: pg })
 
 /** SQLite stored timestamps as integer seconds. */
-const to_date = (value: unknown) => new Date(Number(value) * 1000)
+const toDate = (value: unknown) => new Date(Number(value) * 1000)
+
+/** The old blob used snake_case keys; the column is typed camelCase now. */
+const toProjectData = (value: unknown): ProjectData | null => {
+	const parsed = typeof value === 'string' ? JSON.parse(value) : value
+	if (!parsed || typeof parsed !== 'object') return null
+
+	const old = parsed as Record<string, string | undefined>
+	return {
+		htmlCode: old.html_code ?? old.htmlCode ?? '',
+		cssCode: old.css_code ?? old.cssCode ?? '',
+		jsCode: old.js_code ?? old.jsCode ?? '',
+	}
+}
 
 const read = async (table: string) => (await turso.execute(`select * from "${table}"`)).rows
 
@@ -58,13 +72,13 @@ if (existing > 0) {
 	fail(`refusing to import: the target database already has ${existing} users.\nDrop and re-run \`bun run db:migrate\` against an empty database first.`)
 }
 
-const user_ids = new Set(users.map((row) => Number(row.id)))
-const group_ids = new Set(groups.map((row) => Number(row.id)))
+const userIds = new Set(users.map((row) => Number(row.id)))
+const groupIds = new Set(groups.map((row) => Number(row.id)))
 
 const orphans = [
-	...memberships.filter((row) => !user_ids.has(Number(row.user_id))).map((row) => `users_to_groups.user_id=${row.user_id}`),
-	...memberships.filter((row) => !group_ids.has(Number(row.group_id))).map((row) => `users_to_groups.group_id=${row.group_id}`),
-	...projects.filter((row) => !user_ids.has(Number(row.author_id))).map((row) => `project#${row.id}.author_id=${row.author_id}`),
+	...memberships.filter((row) => !userIds.has(Number(row.user_id))).map((row) => `users_to_groups.user_id=${row.user_id}`),
+	...memberships.filter((row) => !groupIds.has(Number(row.group_id))).map((row) => `users_to_groups.group_id=${row.group_id}`),
+	...projects.filter((row) => !userIds.has(Number(row.author_id))).map((row) => `project#${row.id}.author_id=${row.author_id}`),
 ]
 
 if (orphans.length) {
@@ -72,10 +86,10 @@ if (orphans.length) {
 }
 
 // Emails are unique in the new schema but were not in the old one.
-const by_email = Map.groupBy(users, (row) => String(row.email).toLowerCase())
-const duplicates = [...by_email.values()].filter((rows) => rows.length > 1)
+const byEmail = Map.groupBy(users, (row) => String(row.email).toLowerCase())
+const duplicates = [...byEmail.values()].filter((rows) => rows.length > 1)
 
-const email_overrides = new Map<number, string>()
+const emailOverrides = new Map<number, string>()
 
 for (const rows of duplicates) {
 	const [, ...rest] = rows.toSorted((a, b) => Number(a.id) - Number(b.id))
@@ -83,7 +97,7 @@ for (const rows of duplicates) {
 	if (!fix) {
 		fail(
 			`refusing to import: ${rows.length} accounts share the email ${rows[0]!.email}:\n`
-			+ rows.map((row) => `  #${row.id} ${row.name} (${to_date(row.created_at).toISOString().slice(0, 10)})`).join('\n')
+			+ rows.map((row) => `  #${row.id} ${row.name} (${toDate(row.created_at).toISOString().slice(0, 10)})`).join('\n')
 			+ '\n\nMerge or delete them in the old database, or re-run with --fix to keep the oldest'
 			+ '\naccount on the original address and suffix the newer ones (no accounts or projects are lost).',
 		)
@@ -91,15 +105,14 @@ for (const rows of duplicates) {
 
 	// Keep the oldest account on the original address; suffix the rest so both survive.
 	for (const [index, row] of rest.entries()) {
-		const email = String(row.email)
-		const [local, domain] = email.split('@')
-		email_overrides.set(Number(row.id), `${local}+${index + 2}@${domain}`)
+		const [local, domain] = String(row.email).split('@')
+		emailOverrides.set(Number(row.id), `${local}+${index + 2}@${domain}`)
 	}
 }
 
-if (email_overrides.size) {
+if (emailOverrides.size) {
 	console.log('\nde-duplicating emails:')
-	for (const [id, email] of email_overrides) console.log(`  user#${id} -> ${email}`)
+	for (const [id, email] of emailOverrides) console.log(`  user#${id} -> ${email}`)
 }
 
 
@@ -109,11 +122,11 @@ await db.transaction(async (tx) => {
 	if (users.length) {
 		await tx.insert(schema.user).values(users.map((row) => ({
 			id: Number(row.id),
-			email: email_overrides.get(Number(row.id)) ?? String(row.email).toLowerCase(),
+			email: emailOverrides.get(Number(row.id)) ?? String(row.email).toLowerCase(),
 			name: String(row.name),
 			password: String(row.password),
-			created_at: to_date(row.created_at),
-			is_admin: Boolean(row.is_admin),
+			createdAt: toDate(row.created_at),
+			isAdmin: Boolean(row.is_admin),
 		})))
 	}
 
@@ -127,9 +140,9 @@ await db.transaction(async (tx) => {
 	}
 
 	if (memberships.length) {
-		await tx.insert(schema.users_to_groups).values(memberships.map((row) => ({
-			user_id: Number(row.user_id),
-			group_id: Number(row.group_id),
+		await tx.insert(schema.usersToGroups).values(memberships.map((row) => ({
+			userId: Number(row.user_id),
+			groupId: Number(row.group_id),
 		})))
 	}
 
@@ -137,12 +150,12 @@ await db.transaction(async (tx) => {
 		await tx.insert(schema.project).values(projects.map((row) => ({
 			id: Number(row.id),
 			name: String(row.name),
-			author_id: Number(row.author_id),
-			created_at: to_date(row.created_at),
-			updated_at: to_date(row.updated_at),
-			// `share_slug` is new — mint one per project so every project stays shareable.
-			share_slug: url_id(15),
-			data: typeof row.data === 'string' ? JSON.parse(row.data) : row.data,
+			authorId: Number(row.author_id),
+			createdAt: toDate(row.created_at),
+			updatedAt: toDate(row.updated_at),
+			// `shareSlug` is new — mint one per project so every project stays shareable.
+			shareSlug: urlId(15),
+			data: toProjectData(row.data),
 		})))
 	}
 

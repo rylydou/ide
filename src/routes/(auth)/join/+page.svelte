@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms'
-	import { create_form } from '$lib/form.svelte'
+	import { createForm } from '$lib/form.svelte'
 
-	const form = create_form()
-	let secret_input = $state('')
+	const form = createForm()
+	let secretInput = $state('')
 </script>
 
 <svelte:head>
@@ -23,12 +23,12 @@
 				spellcheck="false"
 				autofocus
 				maxlength={8}
-				bind:value={secret_input}
+				bind:value={secretInput}
 				oninput={() => (form.message = '')}
 			/>
 		</label>
 
-		<button type="submit" class="btn" disabled={!secret_input || form.is_waiting}>Join</button>
+		<button type="submit" class="btn" disabled={!secretInput || form.isWaiting}>Join</button>
 
 		<span>Already joined a class? <a class="link" href="/login">Log in instead</a></span>
 

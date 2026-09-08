@@ -1,57 +1,51 @@
-// ----- Parameters -----
-const ICONS_DIR_PATH = 'icons'
-const JSON_PATH = 'src/icons.json'
-
-
-// ---------------------------------- //
-
+/**
+ * Pre-bakes `assets/icons/*.svg` into a single Iconify JSON collection.
+ *
+ * Not part of the build — `uno.config.ts` reads the SVG directory directly. This exists as
+ * an escape hatch if `@iconify/tools` ever stops working inside the UnoCSS plugin: generate
+ * the JSON once here and point `presetIcons` at it instead.
+ */
 
 import { cleanupSVG, importDirectory, isEmptyColor, parseColors, runSVGO } from '@iconify/tools'
-import fs from 'fs/promises'
 
 
-(async () => {
-	console.log('importing icons from', ICONS_DIR_PATH)
-	const icon_set = await importDirectory(ICONS_DIR_PATH, {})
-	console.log(`found ${icon_set.count()} icons`)
+const iconsDir = 'assets/icons'
+const outputPath = 'assets/icons.json'
 
-	icon_set.forEach((name, type) => {
-		if (type !== 'icon') return
 
-		const svg = icon_set.toSVG(name)
-		if (!svg) {
-			console.error('invalid icon:', name)
-			icon_set.remove(name)
-			return
-		}
+console.log('importing icons from', iconsDir)
+const iconSet = await importDirectory(iconsDir, {})
+console.log(`found ${iconSet.count()} icons`)
 
-		try {
-			cleanupSVG(svg)
+iconSet.forEach((name, type) => {
+	if (type !== 'icon') return
 
-			// assume icon is monotone: replace color with currentColor, add if missing
-			// if icon is not monotone, remove this code
-			parseColors(svg, {
-				defaultColor: 'currentColor',
-				callback: (attr, colorStr, color) => {
-					return !color || isEmptyColor(color)
-						? colorStr
-						: 'currentColor'
-				},
-			})
+	const svg = iconSet.toSVG(name)
+	if (!svg) {
+		console.error('invalid icon:', name)
+		iconSet.remove(name)
+		return
+	}
 
-			runSVGO(svg)
-		} catch (err) {
-			console.error(`error parsing ${name}:`, err)
-			icon_set.remove(name)
-			return
-		}
+	try {
+		cleanupSVG(svg)
 
-		icon_set.fromSVG(name, svg)
-	})
+		// Icons are assumed monotone: every colour becomes `currentColor`.
+		parseColors(svg, {
+			defaultColor: 'currentColor',
+			callback: (_attr, colorStr, color) => !color || isEmptyColor(color) ? colorStr : 'currentColor',
+		})
 
-	console.log('stringify json')
-	const json = JSON.stringify(icon_set.export())
-	console.log('writing to', JSON_PATH)
-	await fs.writeFile(JSON_PATH, json)
-	console.log('done!')
-})()
+		runSVGO(svg)
+	} catch (error) {
+		console.error(`error parsing ${name}:`, error)
+		iconSet.remove(name)
+		return
+	}
+
+	iconSet.fromSVG(name, svg)
+})
+
+console.log('writing to', outputPath)
+await Bun.write(outputPath, JSON.stringify(iconSet.export()))
+console.log('done')

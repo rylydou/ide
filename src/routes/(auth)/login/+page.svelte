@@ -2,9 +2,9 @@
 	import { cfg } from '$lib'
 	import { PasswordInput } from '$lib/components'
 	import { enhance } from '$app/forms'
-	import { create_form } from '$lib/form.svelte'
+	import { createForm } from '$lib/form.svelte'
 
-	const form = create_form()
+	const form = createForm()
 </script>
 
 <svelte:head>
@@ -19,17 +19,17 @@
 		</div>
 
 		<label>
-			<span>School Email (no need for {cfg.default_email_domain})</span>
+			<span>School Email (no need for {cfg.defaultEmailDomain})</span>
 			<!-- svelte-ignore a11y_autofocus -->
 			<input class="input" type="text" name="email" autocomplete="email" autofocus />
 		</label>
 
 		<label>
 			<span>Password</span>
-			<PasswordInput name="password" autocomplete="current-password" disabled={form.is_waiting} />
+			<PasswordInput name="password" autocomplete="current-password" disabled={form.isWaiting} />
 		</label>
 
-		<button type="submit" class="btn" disabled={form.is_waiting}>Login</button>
+		<button type="submit" class="btn" disabled={form.isWaiting}>Login</button>
 
 		<div class="message">{form.message}</div>
 	</form>

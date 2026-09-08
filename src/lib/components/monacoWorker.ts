@@ -1,10 +1,10 @@
 import { emmetHTML } from 'emmet-monaco-es'
 import * as monaco from 'monaco-editor'
 import { html, typescript } from 'monaco-editor'
-import css_worker from 'monaco-editor/languages/features/css/css.worker?worker'
-import html_worker from 'monaco-editor/languages/features/html/html.worker?worker'
-import ts_worker from 'monaco-editor/languages/features/typescript/ts.worker?worker'
-import editor_worker from 'monaco-editor/editor/editor.worker?worker'
+import editorWorker from 'monaco-editor/editor/editor.worker?worker'
+import cssWorker from 'monaco-editor/languages/features/css/css.worker?worker'
+import htmlWorker from 'monaco-editor/languages/features/html/html.worker?worker'
+import tsWorker from 'monaco-editor/languages/features/typescript/ts.worker?worker'
 
 
 self.MonacoEnvironment = {
@@ -13,16 +13,16 @@ self.MonacoEnvironment = {
 			case 'css':
 			case 'scss':
 			case 'less':
-				return new css_worker()
+				return new cssWorker()
 			case 'html':
 			case 'handlebars':
 			case 'razor':
-				return new html_worker()
+				return new htmlWorker()
 			case 'typescript':
 			case 'javascript':
-				return new ts_worker()
+				return new tsWorker()
 			default:
-				return new editor_worker()
+				return new editorWorker()
 		}
 	},
 }

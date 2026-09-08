@@ -1,1 +1,1 @@
-export * from './auth-session'
+export * from './authSession'

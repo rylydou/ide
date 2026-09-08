@@ -1,5 +1,5 @@
 <script lang="ts">
-	import reset_css from '$lib/styles/reset.css?inline'
+	import resetCss from '$lib/styles/reset.css?inline'
 	import { untrack } from 'svelte'
 	import type { HTMLIframeAttributes } from 'svelte/elements'
 
@@ -18,17 +18,17 @@
 	const tag = (name: string, content: string) => `<${name}>${content}</${name}>`
 
 	// A closing script tag inside user JS would otherwise terminate the block early.
-	const escape_script = (code: string) => code.replace(/<\/script/gi, '<\\/script')
+	const escapeScript = (code: string) => code.replace(/<\/script/gi, '<\\/script')
 
 	const build = (html: string, css: string, js: string) => [
 		'<!doctype html><html lang="en"><head>',
 		'<meta charset="UTF-8">',
 		'<meta name="viewport" content="width=device-width, initial-scale=1.0">',
 		'<base target="_blank">',
-		tag('style', css.replace(`@import url('reset.css');`, reset_css)),
+		tag('style', css.replace(`@import url('reset.css');`, resetCss)),
 		'</head><body>',
 		html,
-		tag('script', escape_script(js)),
+		tag('script', escapeScript(js)),
 		'</body></html>',
 	].join('')
 

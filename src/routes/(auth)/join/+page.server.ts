@@ -1,19 +1,18 @@
-import { db, fix_ambiguous, schema } from '$lib/server'
-import { join_group } from '$lib/server/actions'
+import { db, fixAmbiguous } from '$lib/server'
+import { joinGroup } from '$lib/server/actions'
 import { fail, redirect } from '@sveltejs/kit'
-import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import type { Actions } from './$types'
 
 
-const form_schema = z.object({
-	secret: z.string().transform(fix_ambiguous).refine((s) => s.length >= 4, 'Join code is too short'),
+const formSchema = z.object({
+	secret: z.string().transform(fixAmbiguous).refine((s) => s.length >= 4, 'Join code is too short'),
 })
 
 
 export const actions: Actions = {
 	default: async ({ request, locals, cookies }) => {
-		const result = form_schema.safeParse(Object.fromEntries(await request.formData()))
+		const result = formSchema.safeParse(Object.fromEntries(await request.formData()))
 
 		if (!result.success) {
 			return fail(400, { message: result.error.issues[0]!.message })
@@ -22,7 +21,7 @@ export const actions: Actions = {
 		const { secret } = result.data
 
 		const group = await db.query.group.findFirst({
-			where: eq(schema.group.secret, secret),
+			where: { secret },
 			columns: { id: true },
 		})
 
@@ -42,7 +41,7 @@ export const actions: Actions = {
 			redirect(303, '/register')
 		}
 
-		await join_group(secret, session.user.id)
+		await joinGroup(secret, session.user.id)
 		redirect(303, '/')
 	},
 }

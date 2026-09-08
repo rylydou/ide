@@ -18,7 +18,7 @@ type Hotkey = {
 export const hotkey: Action<HTMLElement, Hotkey> = (_node, initial) => {
 	let hotkey = initial
 
-	const on_keydown = (event: KeyboardEvent) => {
+	const onKeydown = (event: KeyboardEvent) => {
 		if (event.key.toLowerCase() !== hotkey.key) return
 		if (!!hotkey.mod !== (event.ctrlKey || event.metaKey)) return
 		if (!!hotkey.shift !== event.shiftKey) return
@@ -27,10 +27,10 @@ export const hotkey: Action<HTMLElement, Hotkey> = (_node, initial) => {
 		hotkey.handler()
 	}
 
-	document.addEventListener('keydown', on_keydown)
+	document.addEventListener('keydown', onKeydown)
 
 	return {
 		update: (next) => (hotkey = next),
-		destroy: () => document.removeEventListener('keydown', on_keydown),
+		destroy: () => document.removeEventListener('keydown', onKeydown),
 	}
 }

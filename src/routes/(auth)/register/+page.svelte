@@ -2,12 +2,12 @@
 	import { cfg } from '$lib'
 	import { PasswordInput } from '$lib/components'
 	import { enhance } from '$app/forms'
-	import { create_form } from '$lib/form.svelte'
+	import { createForm } from '$lib/form.svelte'
 	import type { PageProps } from './$types'
 
 	let { data }: PageProps = $props()
 
-	const form = create_form()
+	const form = createForm()
 </script>
 
 <svelte:head>
@@ -24,7 +24,7 @@
 		<p>Joining <strong>{data.group.name}</strong></p>
 
 		<label>
-			<span>School email (no need for {cfg.default_email_domain})</span>
+			<span>School email (no need for {cfg.defaultEmailDomain})</span>
 			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				class="input"
@@ -47,7 +47,7 @@
 			<PasswordInput name="password" autocomplete="new-password" minlength={8} maxlength={64} />
 		</label>
 
-		<button type="submit" class="btn" disabled={form.is_waiting}>Register</button>
+		<button type="submit" class="btn" disabled={form.isWaiting}>Register</button>
 
 		<div class="message">{form.message}</div>
 	</form>

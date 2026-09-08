@@ -20,4 +20,4 @@ export const check = async (plaintext: string, encrypted: string) => {
 
 
 /** True if `encrypted` uses an older algorithm and should be re-hashed on next successful login. */
-export const needs_rehash = (encrypted: string) => !encrypted.startsWith('$argon2id$')
+export const needsRehash = (encrypted: string) => !encrypted.startsWith('$argon2id$')

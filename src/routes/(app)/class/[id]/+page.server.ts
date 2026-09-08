@@ -1,45 +1,30 @@
-import { db, fix_ambiguous, human_id, schema } from '$lib/server'
+import { db, fixAmbiguous, humanId, schema } from '$lib/server'
 import { error, redirect, type Actions } from '@sveltejs/kit'
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import type { PageServerLoad } from './$types'
 
 
-const group_id_schema = z.coerce.number().int('id must be a whole number')
+const groupIdSchema = z.coerce.number().int('id must be a whole number')
 
 
 export const load = (async ({ locals, params }) => {
 	if (!locals.session) redirect(303, '/login')
 	const { user } = locals.session
 
-	const group_id_result = group_id_schema.safeParse(params.id)
-	if (!group_id_result.success) error(400)
+	const groupId = groupIdSchema.safeParse(params.id)
+	if (!groupId.success) error(400)
 
 	const group = await db.query.group.findFirst({
-		where: eq(schema.group.id, group_id_result.data),
+		// Membership is the access check, expressed as a filter on the related users —
+		// a non-member gets no row at all, so other classes never leak their existence.
+		where: { id: groupId.data, users: { id: user.id } },
 		with: {
-			users_to_groups: {
-				columns: {
-					user_id: false,
-					group_id: false,
-				},
+			users: {
+				columns: { id: true, name: true, isAdmin: true },
 				with: {
-					user: {
-						columns: {
-							id: true,
-							name: true,
-							is_admin: true,
-						},
-						with: {
-							projects: {
-								columns: {
-									id: true,
-									name: true,
-									created_at: true,
-									updated_at: true,
-								},
-							},
-						},
+					projects: {
+						columns: { id: true, name: true, createdAt: true, updatedAt: true },
 					},
 				},
 			},
@@ -48,26 +33,21 @@ export const load = (async ({ locals, params }) => {
 
 	if (!group) error(404, 'Class not found')
 
-	const users = group.users_to_groups.map(({ user }) => user)
-
-	// Membership is the access check — don't leak the existence of other classes.
-	if (!users.some((u) => u.id === user.id)) error(404, 'Class not found')
-
 	return {
 		group: {
 			id: group.id,
 			name: group.name,
 			// The join code is an invite credential; only admins may see it.
-			secret: user.is_admin ? group.secret : null,
-			users,
+			secret: user.isAdmin ? group.secret : null,
+			users: group.users,
 		},
 	}
 }) satisfies PageServerLoad
 
 
-const update_schema = z.object({
+const updateSchema = z.object({
 	name: z.string().trim().min(1, 'A class name is required').max(60),
-	secret: z.string().transform(fix_ambiguous),
+	secret: z.string().transform(fixAmbiguous),
 })
 
 
@@ -80,25 +60,24 @@ export const actions: Actions = {
 	update: async ({ request, locals, params }) => {
 		if (!locals.session) redirect(303, '/login')
 		const { user } = locals.session
-		if (!user.is_admin) error(403, 'You have to be an admin to update a class.')
+		if (!user.isAdmin) error(403, 'You have to be an admin to update a class.')
 
-		const group_id_result = group_id_schema.safeParse(params.id)
-		if (!group_id_result.success) error(400)
+		const groupId = groupIdSchema.safeParse(params.id)
+		if (!groupId.success) error(400)
 
-		const form_data = Object.fromEntries((await request.formData()).entries())
-		const data_result = update_schema.safeParse(form_data)
-		if (!data_result.success) error(400, z.prettifyError(data_result.error))
-		const data = data_result.data
+		const formData = Object.fromEntries((await request.formData()).entries())
+		const result = updateSchema.safeParse(formData)
+		if (!result.success) error(400, z.prettifyError(result.error))
 
 		// The "randomize" button submits a placeholder; an empty field closes the class.
-		const secret = form_data.secret === '(randomize join code)'
-			? human_id(6)
-			: data.secret || null
+		const secret = formData.secret === '(randomize join code)'
+			? humanId(6)
+			: result.data.secret || null
 
 		await db.update(schema.group).set({
-			name: data.name,
+			name: result.data.name,
 			secret,
-		}).where(eq(schema.group.id, group_id_result.data))
+		}).where(eq(schema.group.id, groupId.data))
 
 		return {}
 	},
@@ -108,12 +87,12 @@ export const actions: Actions = {
 		if (!locals.session) redirect(303, '/login')
 		const { user } = locals.session
 
-		const group_id_result = group_id_schema.safeParse(params.id)
-		if (!group_id_result.success) error(400)
+		const groupId = groupIdSchema.safeParse(params.id)
+		if (!groupId.success) error(400)
 
-		await db.delete(schema.users_to_groups).where(and(
-			eq(schema.users_to_groups.user_id, user.id),
-			eq(schema.users_to_groups.group_id, group_id_result.data),
+		await db.delete(schema.usersToGroups).where(and(
+			eq(schema.usersToGroups.userId, user.id),
+			eq(schema.usersToGroups.groupId, groupId.data),
 		))
 
 		redirect(303, '/')

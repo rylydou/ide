@@ -1,4 +1,4 @@
-export const future_date = (days: number) => {
+export const futureDate = (days: number) => {
 	const date = new Date()
 	date.setDate(date.getDate() + days)
 	return date

@@ -6,16 +6,16 @@ import type { SubmitFunction } from '@sveltejs/kit'
  * Shared state + `use:enhance` handler for the auth forms: tracks the in-flight
  * state and surfaces the server's `fail()` message instead of a full page reload.
  */
-export const create_form = () => {
+export const createForm = () => {
 	let message = $state('')
-	let is_waiting = $state(false)
+	let isWaiting = $state(false)
 
 	const submit: SubmitFunction = () => {
-		is_waiting = true
+		isWaiting = true
 		message = ''
 
 		return async ({ result }) => {
-			is_waiting = false
+			isWaiting = false
 
 			switch (result.type) {
 				case 'failure':
@@ -33,7 +33,7 @@ export const create_form = () => {
 	return {
 		get message() { return message },
 		set message(value: string) { message = value },
-		get is_waiting() { return is_waiting },
+		get isWaiting() { return isWaiting },
 		submit,
 	}
 }

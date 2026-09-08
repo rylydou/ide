@@ -1,2 +1,2 @@
-export * from './grant-session'
-export * from './join-group'
+export * from './grantSession'
+export * from './joinGroup'

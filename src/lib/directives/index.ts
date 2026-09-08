@@ -1,2 +1,2 @@
-export * from './auto-size'
+export * from './autoSize'
 export * from './hotkey'

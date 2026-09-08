@@ -1,6 +1,5 @@
-import { db, is_users_mutuals, schema } from '$lib/server'
+import { db, isUsersMutuals } from '$lib/server'
 import { error, redirect } from '@sveltejs/kit'
-import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import type { PageServerLoad } from './$types'
 
@@ -9,11 +8,11 @@ export const load = (async ({ locals, params }) => {
 	if (!locals.session) redirect(303, '/login')
 	const { user } = locals.session
 
-	const project_id_result = z.coerce.number().int('id must be a whole number').safeParse(params.id)
-	if (!project_id_result.success) error(400)
+	const projectId = z.coerce.number().int('id must be a whole number').safeParse(params.id)
+	if (!projectId.success) error(400)
 
 	const project = await db.query.project.findFirst({
-		where: eq(schema.project.id, project_id_result.data),
+		where: { id: projectId.data },
 		with: {
 			author: {
 				columns: { password: false },
@@ -23,8 +22,8 @@ export const load = (async ({ locals, params }) => {
 
 	if (!project) error(404)
 
-	// Non-authors may only open projects belonging to someone in one of their groups.
-	if (project.author_id !== user.id && !await is_users_mutuals(user.id, project.author_id))
+	// Non-authors may only open projects belonging to someone in one of their classes.
+	if (project.authorId !== user.id && !await isUsersMutuals(user.id, project.authorId))
 		error(403, 'This project belongs to someone outside your classes.')
 
 	return { project }

@@ -1,10 +1,11 @@
 import type { Action } from 'svelte/action'
 
 
-export const auto_size: Action<HTMLInputElement> = (input) => {
+/** Keeps a text input exactly as wide as its content. */
+export const autoSize: Action<HTMLInputElement> = (input) => {
 	const resize = () => {
 		input.style.width = '0'
-		input.style.width = input.scrollWidth + 'px'
+		input.style.width = `${input.scrollWidth}px`
 	}
 
 	input.addEventListener('input', resize)
@@ -12,8 +13,9 @@ export const auto_size: Action<HTMLInputElement> = (input) => {
 	resize()
 
 	return {
-		destroy() {
+		destroy: () => {
 			input.removeEventListener('input', resize)
-		}
+			input.removeEventListener('blur', resize)
+		},
 	}
 }

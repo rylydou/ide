@@ -8,13 +8,13 @@
 
 	const group = $derived(data.group)
 
-	let edit_dialog = $state<HTMLDialogElement>()
-	let join_code_dialog = $state<HTMLDialogElement>()
-	let secret_input = $state(untrack(() => data.group.secret) ?? '')
+	let editDialog = $state<HTMLDialogElement>()
+	let joinCodeDialog = $state<HTMLDialogElement>()
+	let secretInput = $state(untrack(() => data.group.secret) ?? '')
 
 	let filter = $state('')
 
-	const filtered_users = $derived.by(() => {
+	const filteredUsers = $derived.by(() => {
 		if (!filter) return group.users
 
 		const needle = filter.toLowerCase()
@@ -37,14 +37,14 @@
 		<header>
 			<a class="btn btn-text" href="/"><div class="icon-home"></div> Home</a>
 
-			{#if data.session.user.is_admin}
-				<button class="btn btn-text" onclick={() => edit_dialog?.showModal()}>
+			{#if data.session.user.isAdmin}
+				<button class="btn btn-text" onclick={() => editDialog?.showModal()}>
 					<div class="icon-pencil"></div> Edit Class
 				</button>
 				<button
 					class="btn btn-text"
 					disabled={!group.secret}
-					onclick={() => join_code_dialog?.showModal()}
+					onclick={() => joinCodeDialog?.showModal()}
 				>
 					<div class="icon-expand"></div> Show Join Code
 				</button>
@@ -64,7 +64,7 @@
 		</header>
 
 		<ul class="sec-content list-grid">
-			{#each filtered_users as user (user.id)}
+			{#each filteredUsers as user (user.id)}
 				<li><UserCard {user} /></li>
 			{:else}
 				<li>No matching users.</li>
@@ -73,7 +73,7 @@
 	</section>
 </main>
 
-<dialog bind:this={edit_dialog} class="dialog">
+<dialog bind:this={editDialog} class="dialog">
 	<div class="dialog-header">
 		<h1>Edit Class</h1>
 		<form method="dialog">
@@ -98,13 +98,13 @@
 						autocomplete="off"
 						spellcheck="false"
 						placeholder="(unjoinable)"
-						bind:value={secret_input}
+						bind:value={secretInput}
 					/>
 					<button
 						type="button"
 						class="btn"
 						aria-label="Randomize join code"
-						onclick={() => (secret_input = '(randomize join code)')}
+						onclick={() => (secretInput = '(randomize join code)')}
 					>
 						<div class="icon-redo"></div>
 					</button>
@@ -115,7 +115,7 @@
 	</div>
 </dialog>
 
-<dialog bind:this={join_code_dialog} class="dialog dialog-full">
+<dialog bind:this={joinCodeDialog} class="dialog dialog-full">
 	<div class="dialog-header">
 		<h1>Join Code for {group.name}</h1>
 		<form method="dialog">

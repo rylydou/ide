@@ -1,20 +1,11 @@
-import { relations } from 'drizzle-orm'
-import { project, session, users_to_groups } from '.'
 import { bool, id, str, table, timestamp } from './shared'
 
 
 export const user = table('user', {
-	id: id('id'),
-	email: str('email').notNull().unique('user-email'),
-	name: str('name').notNull(),
-	password: str('password').notNull(),
-	created_at: timestamp('created_at').notNull(),
-	is_admin: bool('is_admin').default(false).notNull(),
+	id: id(),
+	email: str().notNull().unique('user-email'),
+	name: str().notNull(),
+	password: str().notNull(),
+	createdAt: timestamp().notNull(),
+	isAdmin: bool().default(false).notNull(),
 })
-
-
-export const user_relations = relations(user, ({ many }) => ({
-	projects: many(project),
-	sessions: many(session),
-	users_to_groups: many(users_to_groups),
-}))
