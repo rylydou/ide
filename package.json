@@ -18,18 +18,18 @@
 	},
 	"devDependencies": {
 		"@iconify/tools": "^5.0.14",
-		"@iconify/utils": "^3.1.5",
-		"@libsql/client": "^0.10.0",
+		"@iconify/utils": "^3.1.7",
+		"@libsql/client": "^0.18.0",
 		"@sveltejs/kit": "^2.70.3",
 		"@sveltejs/vite-plugin-svelte": "^7.3.0",
-		"@types/bun": "^1.4.1",
+		"@types/bun": "^1.4.2",
 		"@unocss/extractor-svelte": "^66.10.0",
 		"drizzle-kit": "1.0.0-rc.4",
 		"svelte": "^5.57.0",
 		"svelte-adapter-bun": "^1.0.1",
 		"svelte-check": "^4.7.6",
 		"tslib": "^2.8.1",
-		"typescript": "^6.0.3",
+		"typescript": "^7.0.2",
 		"vite": "^8.2.2"
 	},
 	"dependencies": {
