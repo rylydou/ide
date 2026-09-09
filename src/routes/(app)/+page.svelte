@@ -1,23 +1,23 @@
 <script lang="ts">
-	import { page } from '$app/stores'
 	import { greet } from '$lib'
 	import { GroupCard, ProjectCard, SearchInput } from '$lib/components'
 	import { flip } from 'svelte/animate'
 	import { expoOut as easing } from 'svelte/easing'
 	import { crossfade, scale } from 'svelte/transition'
-	import type { PageData } from './$types'
+	import type { PageProps } from './$types'
 
-	export let data: PageData
+	let { data }: PageProps = $props()
 
-	const greeting = greet($page.data.session!)
+	const greeting = $derived(greet(data.session))
 
-	let projects_filter = ''
+	let projectsFilter = $state('')
 
-	$: filtered_projects = projects_filter
-		? data.projects.filter((project) => {
-				return project.name.toLowerCase().includes(projects_filter.toLowerCase())
-			})
-		: data.projects
+	const filteredProjects = $derived.by(() => {
+		if (!projectsFilter) return data.projects
+
+		const needle = projectsFilter.toLowerCase()
+		return data.projects.filter((project) => project.name.toLowerCase().includes(needle))
+	})
 
 	const [send, receive] = crossfade({
 		duration: 200,
@@ -33,6 +33,11 @@
 <main class="dash-layout">
 	<header>
 		<h1>{greeting}</h1>
+		<form method="post" action="/logout">
+			<button class="btn btn-text" type="submit">
+				<div class="icon-close"></div> Sign out
+			</button>
+		</form>
 	</header>
 
 	<section>
@@ -40,15 +45,15 @@
 			{#each data.groups as group (group.id)}
 				<GroupCard {group} />
 			{/each}
-			{#if $page.data.session?.user.is_admin}
+
+			{#if data.session.isAdmin}
 				<div class="card-group">
 					<div class="card card-new">
 						<a class="card-link" href="/join">Join class</a>
 						<span>Join a class</span>
 					</div>
 					<div class="card card-new">
-						<a class="card-link" href="/class/new" data-sveltekit-preload-data="off">Create class</a
-						>
+						<a class="card-link" href="/class/new" data-sveltekit-preload-data="off">Create class</a>
 						<span>Create a class</span>
 					</div>
 				</div>
@@ -63,15 +68,16 @@
 
 	<section>
 		<header>
-			<SearchInput placeholder="Search your projects..." bind:value={projects_filter} />
+			<SearchInput placeholder="Search your projects..." bind:value={projectsFilter} />
 			<div class="buttons">
-				<a class="btn btn-accent btn-text" href="/project/new" data-sveltekit-preload-data="off"
-					>New Project</a
-				>
+				<a class="btn btn-accent btn-text" href="/project/new" data-sveltekit-preload-data="off">
+					New Project
+				</a>
 			</div>
 		</header>
+
 		<ul class="sec-content list-grid">
-			{#each filtered_projects as project (project.id)}
+			{#each filteredProjects as project (project.id)}
 				<li
 					animate:flip={{ duration: 200, easing }}
 					out:send={{ key: project.id }}
@@ -80,7 +86,7 @@
 					<ProjectCard {project} />
 				</li>
 			{:else}
-				<li>{projects_filter ? 'No results' : 'Get started by clicking "New Project"'}</li>
+				<li>{projectsFilter ? 'No results' : 'Get started by clicking "New Project"'}</li>
 			{/each}
 		</ul>
 	</section>

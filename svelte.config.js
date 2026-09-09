@@ -1,18 +1,14 @@
-import adapter from '@sveltejs/adapter-auto'
+import adapter from 'svelte-adapter-bun'
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
 
 
 /** @type {import('@sveltejs/kit').Config} */
-const config = {
+export default {
 	preprocess: vitePreprocess(),
-	onwarn: (warning, handler) => {
-		if (warning.code.startsWith('a11y-')) return
-		handler(warning)
-	},
 	kit: {
-		adapter: adapter()
-	}
+		adapter: adapter({
+			out: 'build',
+			precompress: true,
+		}),
+	},
 }
-
-
-export default config

@@ -1,51 +1,55 @@
-*:not(dialog) {
-	appearance: none;
-	
-	box-sizing: border-box;
-	
-	width: unset;
-	height: unset;
-	min-width: 0;
-	min-height: 0;
-	max-width: unset;
-	max-height: unset;
-	margin: unset;
-	border: unset;
-	padding: unset;
-	
-	font: unset;
-	
-	opacity: unset;
-	background: unset;
-	color: unset;
-	text-decoration: unset;
-	
-}
+@layer reset, tokens, base, components;
 
+@layer reset {
+	*:not(dialog) {
+		appearance: none;
 
-ul, ol {
-	list-style: none;
-}
+		box-sizing: border-box;
 
+		width: unset;
+		height: unset;
+		min-width: 0;
+		min-height: 0;
+		max-width: unset;
+		max-height: unset;
+		margin: unset;
+		border: unset;
+		padding: unset;
 
-img {
-	max-width: 100%;
-	height: auto;
-	vertical-align: middle;
-	font-style: italic;
-	background-repeat: no-repeat;
-	background-size: cover;
-	shape-margin: 1rem;
-}
+		font: unset;
 
+		opacity: unset;
+		background: unset;
+		color: unset;
+		text-decoration: unset;
+	}
 
-dialog {
-	appearance: none;
-	box-sizing: border-box;
-	padding: unset;
-	border: unset;
-	background: unset;
-	max-width: unset;
-	max-height: unset;
-	padding: unset;
+	[hidden] {
+		display: none !important;
+	}
+
+	ul,
+	ol {
+		list-style: none;
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+		vertical-align: middle;
+		font-style: italic;
+		background-repeat: no-repeat;
+		background-size: cover;
+		shape-margin: 1rem;
+	}
+
+	dialog {
+		appearance: none;
+		box-sizing: border-box;
+		padding: unset;
+		border: unset;
+		background: unset;
+		max-width: unset;
+		max-height: unset;
+	}
 }

@@ -1,22 +1,34 @@
-import { integer, real, sqliteTableCreator, text } from 'drizzle-orm/sqlite-core'
+import { boolean, customType, doublePrecision, integer, pgTableCreator, text, timestamp as pgTimestamp, varchar } from 'drizzle-orm/pg-core'
 
 
-export const table = sqliteTableCreator((name) => name)
+/**
+ * Tables keep their literal names; columns are derived from the TypeScript key in
+ * `snake_case`, so the schema reads as idiomatic JS without renaming the database.
+ */
+export const table = pgTableCreator((name) => name, 'snake_case')
 
 
-export const int = (name: string) => integer(name, { mode: 'number' })
-export const bool = (name: string) => integer(name, { mode: 'boolean' })
-export const float = (name: string) => real(name)
+export const int = integer
+export const bool = boolean
+export const float = doublePrecision
 
-export const timestamp = (name: string) => integer(name, { mode: 'timestamp' }).$defaultFn(() => new Date())
-export const str = (name: string, options?: { length?: number, enum?: [string, ...string[]] }) => text(name, { ...options, mode: 'text' })
-export const json = (name: string) => text(name, { mode: 'json' })
+export const timestamp = () => pgTimestamp({ withTimezone: true, mode: 'date' }).defaultNow()
+export const str = (length?: number) => length === undefined ? text() : varchar({ length })
 
-export const id = (name: string) => integer(name).primaryKey({ autoIncrement: true, })
-export const ref = (name: string) => integer(name)
+/**
+ * `jsonb`, but handing the value to the driver untouched.
+ *
+ * Drizzle's own `jsonb()` calls `JSON.stringify` in `toDriver`, and `Bun.SQL` then encodes
+ * that string as JSON in turn — the column ends up holding a jsonb *string* rather than an
+ * object, which reads back fine but is unqueryable from SQL.
+ */
+const jsonbPassthrough = customType<{ data: unknown, driverData: unknown }>({
+	dataType: () => 'jsonb',
+	toDriver: (value) => value,
+})
 
-// export const id = (name: string) => text(name, { length: 15, mode: 'text', }).$defaultFn(() => url_id(length))
-// export const ref = (name: string) => text(name, { length: 15, mode: 'text', })
+export const json = <T>() => jsonbPassthrough().$type<T>()
 
-// export const id = (name: string) => serial(name)
-// export const ref = (name: string) => integer(name)
+/** Identity primary key. `byDefault` so explicit ids can still be inserted (see `scripts/import-from-turso.ts`). */
+export const id = () => integer().primaryKey().generatedByDefaultAsIdentity()
+export const ref = integer

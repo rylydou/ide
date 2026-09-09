@@ -1,12 +1,14 @@
 import { sveltekit } from '@sveltejs/kit/vite'
+import unocss from 'unocss/vite'
 import { defineConfig } from 'vite'
-
-import UnoCSS from 'unocss/vite'
 
 
 export default defineConfig({
 	plugins: [
-		UnoCSS(),
+		unocss(),
 		sveltekit(),
-	]
+	],
+	build: {
+		target: 'esnext',
+	},
 })

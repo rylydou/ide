@@ -1,14 +1,40 @@
-import type { editor } from 'monaco-editor'
+import type { editor } from 'monaco-editor';
+import type ms from 'ms';
 
 
 // ----- Auth -----
-export const max_sessions_per_user = 3
-export const session_max_age_days = 30
-export const encryption_salt_rounds = 10
-export const default_email_domain = '@student.cislions.org'
+export const maxSessionsPerUser = 3;
+
+/**
+ * How long a signed access token is trusted without touching the database. This is also the
+ * worst-case delay before a revoked session stops working, so keep it short.
+ */
+export const accessTokenTimeToLive = '15m' satisfies ms.StringValue;
+
+/** How long a signed-in browser stays signed in. */
+export const sessionTokenTimeToLive = '30d' satisfies ms.StringValue;
+
+/** Slide the session expiry forward on each refresh, so active users are never logged out. */
+export const refreshSessionTokenOnUse = true;
+
+/** Re-issue the session token on each refresh, making a stolen one single-use. */
+export const rotateSessionTokenOnUse = true;
+
+export const accessTokenCookieKey = 'access_token';
+export const sessionTokenCookieKey = 'session_token';
+/** argon2id parameters for `Bun.password` (OWASP-recommended baseline). */
+export const argon2 = {
+	algorithm: 'argon2id',
+	memoryCost: 19_456,
+	timeCost: 2,
+} as const;
+
+/** Max total characters (html + css + js) accepted for a single project. */
+export const maxPayloadLength = 1_048_576; // 1 MiB
+export const defaultEmailDomain = '@student.cislions.org';
 
 
-export const monaco_theme: editor.IStandaloneThemeData = {
+export const monacoTheme: editor.IStandaloneThemeData = {
 	base: 'vs-dark',
 	inherit: false,
 	rules: [
@@ -115,10 +141,10 @@ export const monaco_theme: editor.IStandaloneThemeData = {
 		'list.inactiveSelectionIconForeground': '#a0938e',
 		'scrollbar.shadow': '#302c2e',
 	},
-}
+};
 
 
-export const monaco_options: editor.IStandaloneEditorConstructionOptions = {
+export const monacoOptions: editor.IStandaloneEditorConstructionOptions = {
 	theme: 'zuhgy-dark',
 	maxTokenizationLineLength: 4_096,
 	automaticLayout: true,
@@ -151,7 +177,7 @@ export const monaco_options: editor.IStandaloneEditorConstructionOptions = {
 	},
 	renderLineHighlight: 'none',
 	colorDecorators: true,
-	defaultColorDecorators: true,
+	defaultColorDecorators: 'auto',
 	mouseWheelZoom: true,
 	suggestFontSize: 16,
 	suggestLineHeight: 28,
@@ -166,4 +192,4 @@ export const monaco_options: editor.IStandaloneEditorConstructionOptions = {
 		indentation: false,
 	},
 	wordWrap: 'on',
-}
+};

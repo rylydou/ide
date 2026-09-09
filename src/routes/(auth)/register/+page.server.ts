@@ -1,82 +1,81 @@
-import { error, fail, json, redirect } from '@sveltejs/kit'
-import type { Actions, PageServerLoad } from './$types'
-import { z } from 'zod'
-import { db, encrypt, schema } from '$lib/server'
-import { eq, ilike } from 'drizzle-orm'
-import { grant_session, join_group } from '$lib/server/actions'
 import { cfg } from '$lib'
+import { db, encrypt, schema } from '$lib/server'
+import { userSession } from '$lib/server/auth'
+import { joinGroup } from '$lib/server/actions'
+import { fail, redirect } from '@sveltejs/kit'
+import { z } from 'zod'
+import type { Actions, PageServerLoad } from './$types'
 
 
 export const load: PageServerLoad = async ({ cookies }) => {
-	const join_secret = (cookies.get('join_secret') || '').trim()
+	const joinSecret = (cookies.get('join_secret') ?? '').trim()
 
-	const group = join_secret ? await db.query.group.findFirst({
-		where: eq(schema.group.secret, join_secret),
-	}) : null
+	const group = joinSecret
+		? await db.query.group.findFirst({
+			where: { secret: joinSecret },
+			columns: { id: true, name: true },
+		})
+		: null
 
-	if (!group) {
-		throw redirect(303, '/join')
-	}
+	if (!group) redirect(303, '/join')
 
-	return {
-		group,
-	}
+	return { group }
 }
 
 
+const dataSchema = z.object({
+	email: z.string().trim().toLowerCase().min(1, 'An email is required'),
+	name: z.string().trim().min(3, 'Your name must be at least 3 characters long'),
+	password: z.string().min(8, 'Password must be at least 8 characters long'),
+})
+
+
 export const actions: Actions = {
-	default: async ({ request, cookies, }) => {
-		const data_schema = z.object({
-			secret: z.string().trim().toLowerCase().min(6).max(6),
-			email: z.string().trim().toLowerCase(),
-			name: z.string().min(3),
-			password: z.string().min(8),
-		})
-
+	default: async ({ request, cookies }) => {
 		const secret = cookies.get('join_secret')
-		if (!secret) {
-			throw redirect(303, '/join')
-		}
+		if (!secret) redirect(303, '/join')
 
-		const form_data = Object.fromEntries(await request.formData())
-		const result = await data_schema.safeParseAsync({
-			...form_data,
-			secret,
-		})
-
+		const result = dataSchema.safeParse(Object.fromEntries(await request.formData()))
 		if (!result.success) {
-			return fail(400, {
-				message: result.error.errors[0].message,
-			})
+			return fail(400, { message: result.error.issues[0]!.message })
 		}
 
 		const data = result.data
+		if (!data.email.includes('@')) data.email += cfg.defaultEmailDomain
 
-		if (data.email.indexOf('@') < 0) {
-			data.email += cfg.default_email_domain
-		}
-
-		const group = db.query.group.findFirst({
-			where: eq(schema.group.secret, data.secret)
+		const group = await db.query.group.findFirst({
+			where: { secret },
+			columns: { id: true },
 		})
 
 		if (!group) {
-			return fail(401, {
-				message: 'Invalid secret code',
-			})
+			return fail(401, { message: 'Invalid secret code' })
 		}
 
-		const encrypted_password = await encrypt(data.password)
-		const new_user = (await db.insert(schema.user).values({
+		const existing = await db.query.user.findFirst({
+			where: { email: data.email },
+			columns: { id: true },
+		})
+
+		if (existing) {
+			return fail(409, { message: 'An account with that email already exists. Try logging in.' })
+		}
+
+		const [newUser] = await db.insert(schema.user).values({
 			name: data.name,
 			email: data.email,
-			password: encrypted_password,
-		}).returning())[0]
+			password: await encrypt(data.password),
+		}).returning()
 
 		cookies.delete('join_secret', { path: '/' })
-		await grant_session(new_user.id, cookies)
-		await join_group(data.secret, new_user.id)
+		await userSession.grant(cookies, {
+			userId: newUser!.id,
+			name: newUser!.name,
+			email: newUser!.email,
+			isAdmin: newUser!.isAdmin,
+		})
+		await joinGroup(secret, newUser!.id)
 
-		throw redirect(303, '/')
+		redirect(303, '/')
 	},
 }

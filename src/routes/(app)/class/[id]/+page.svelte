@@ -1,52 +1,62 @@
 <script lang="ts">
-	import { browser } from '$app/environment'
+	import { page } from '$app/state'
+	import { untrack } from 'svelte'
 	import { SearchInput, UserCard } from '$lib/components'
+	import type { PageProps } from './$types'
 
-	import type { PageData } from './$types'
+	let { data }: PageProps = $props()
 
-	export let data: PageData
-	const { group } = data
+	const group = $derived(data.group)
 
-	let edit_dialog: HTMLDialogElement
-	let join_code_dialog: HTMLDialogElement
+	let editDialog = $state<HTMLDialogElement>()
+	let joinCodeDialog = $state<HTMLDialogElement>()
+	let secretInput = $state(untrack(() => data.group.secret) ?? '')
 
-	let filter = ''
+	let filter = $state('')
 
-	$: filtered_users = filter
-		? group.users.filter(
-				(user) =>
-					user.name.includes(filter) || user.projects.some(({ name }) => name.includes(filter)),
-			)
-		: group.users
+	const filteredUsers = $derived.by(() => {
+		if (!filter) return group.users
+
+		const needle = filter.toLowerCase()
+		return group.users.filter((user) =>
+			user.name.toLowerCase().includes(needle)
+			|| user.projects.some(({ name }) => name.toLowerCase().includes(needle)))
+	})
 </script>
 
 <svelte:head>
-	<title>{data.group.name}</title>
+	<title>{group.name}</title>
 </svelte:head>
 
 <main class="dash-layout">
 	<header>
-		<h1>{data.group.name}</h1>
+		<h1>{group.name}</h1>
 	</header>
 
 	<section>
 		<header>
-			<a class="btn btn-text" href="/"> <div class="icon-home"></div> Home</a>
+			<a class="btn btn-text" href="/"><div class="icon-home"></div> Home</a>
 
-			{#if data.session.user.is_admin}
-				<button class="btn btn-text" on:click={() => edit_dialog.showModal()}>
-					<div class="icon-pencil"></div>Edit Class
+			{#if data.session.isAdmin}
+				<button class="btn btn-text" onclick={() => editDialog?.showModal()}>
+					<div class="icon-pencil"></div> Edit Class
 				</button>
 				<button
 					class="btn btn-text"
 					disabled={!group.secret}
-					on:click={() => join_code_dialog.showModal()}
+					onclick={() => joinCodeDialog?.showModal()}
 				>
 					<div class="icon-expand"></div> Show Join Code
 				</button>
 			{/if}
 
-			<div style="flex: 1;"></div>
+			<div class="spacer"></div>
+
+			<form method="post" action="?/leave">
+				<button class="btn btn-text" type="submit">
+					<div class="icon-close"></div> Leave Class
+				</button>
+			</form>
 		</header>
 
 		<header>
@@ -54,47 +64,47 @@
 		</header>
 
 		<ul class="sec-content list-grid">
-			{#each filtered_users as user (user.id)}
-				<li>
-					<UserCard {user} />
-				</li>
+			{#each filteredUsers as user (user.id)}
+				<li><UserCard {user} /></li>
+			{:else}
+				<li>No matching users.</li>
 			{/each}
 		</ul>
 	</section>
 </main>
 
-<dialog bind:this={edit_dialog} class="dialog">
+<dialog bind:this={editDialog} class="dialog">
 	<div class="dialog-header">
 		<h1>Edit Class</h1>
 		<form method="dialog">
-			<button class="btn" title="Close">
+			<button class="btn" title="Close" aria-label="Close">
 				<div class="icon-close"></div>
 			</button>
 		</form>
 	</div>
 	<div class="dialog-content">
-		<form action={`${data.group.id}`} method="post" class="form">
+		<form action="?/update" method="post" class="form">
 			<label>
 				<span>Class Name</span>
-				<input type="text" class="input" name="name" value={data.group.name} />
+				<input type="text" class="input" name="name" value={group.name} />
 			</label>
 			<label>
 				<span>Join Code</span>
 				<div class="input-group">
 					<input
 						type="text"
-						class="input"
+						class="input join-code"
 						name="secret"
 						autocomplete="off"
 						spellcheck="false"
 						placeholder="(unjoinable)"
-						style="text-transform: uppercase;"
-						bind:value={data.group.secret}
+						bind:value={secretInput}
 					/>
 					<button
 						type="button"
 						class="btn"
-						on:click={() => (data.group.secret = '(randomize join code)')}
+						aria-label="Randomize join code"
+						onclick={() => (secretInput = '(randomize join code)')}
 					>
 						<div class="icon-redo"></div>
 					</button>
@@ -105,25 +115,33 @@
 	</div>
 </dialog>
 
-<dialog bind:this={join_code_dialog} class="dialog dialog-full">
+<dialog bind:this={joinCodeDialog} class="dialog dialog-full">
 	<div class="dialog-header">
 		<h1>Join Code for {group.name}</h1>
 		<form method="dialog">
-			<button class="btn" title="Close">
+			<button class="btn" title="Close" aria-label="Close">
 				<div class="icon-close"></div>
 			</button>
 		</form>
 	</div>
 
 	<div class="dialog-content join-content">
-		<div class="join-info">Join at <code>{browser ? location.host : ''}</code></div>
-		<div class="join-code">{group.secret || '------'}</div>
+		<div class="join-info">Join at <code>{page.url.host}</code></div>
+		<div class="join-code-display">{group.secret || '------'}</div>
 	</div>
 </dialog>
 
-<style lang="scss">
+<style>
+	.spacer {
+		flex: 1;
+	}
+
+	.join-code {
+		text-transform: uppercase;
+	}
+
 	.join-content {
-		height: calc(100vh - 7rem);
+		height: calc(100dvh - 7rem);
 	}
 
 	.join-info {
@@ -131,13 +149,11 @@
 		font-size: 2rem;
 	}
 
-	.join-code {
+	.join-code-display {
 		text-align: center;
 		text-transform: uppercase;
 		font-family: var(--font-mono);
-		font-feature-settings:
-			'liga' 0,
-			'zero' 1;
+		font-feature-settings: 'liga' 0, 'zero' 1;
 		font-weight: 900;
 		font-size: 18vw;
 		line-height: 18vw;

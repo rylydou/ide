@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { applyAction, enhance } from '$app/forms'
+	import { enhance } from '$app/forms'
+	import { createForm } from '$lib/form.svelte'
 
-	let message = ''
-
-	let is_waiting = false
-	let secret_input = ''
+	const form = createForm()
+	let secretInput = $state('')
 </script>
 
 <svelte:head>
@@ -12,52 +11,33 @@
 </svelte:head>
 
 <main class="layout-center">
-	<form
-		class="form center-form form"
-		method="post"
-		use:enhance={() => {
-			is_waiting = true
-
-			return async ({ result }) => {
-				console.log({ result })
-				is_waiting = false
-
-				switch (result.type) {
-					case 'redirect':
-					case 'success':
-						return await applyAction(result)
-					case 'failure':
-						message = result.data?.message?.toString() || 'Something went wrong'
-						return
-					case 'error':
-						message = result?.error?.toString() || 'An error occurred'
-						return
-				}
-			}
-		}}
-	>
+	<form class="form center-form" method="post" use:enhance={form.submit}>
 		<label>
 			<span>Secret class code</span>
+			<!-- svelte-ignore a11y_autofocus -->
 			<input
 				type="text"
-				class="password"
+				class="password join-code"
 				name="secret"
 				autocomplete="off"
 				spellcheck="false"
 				autofocus
-				maxlength="8"
-				bind:value={secret_input}
-				on:input={() => (message = '')}
-				style="text-transform: uppercase;"
+				maxlength={8}
+				bind:value={secretInput}
+				oninput={() => (form.message = '')}
 			/>
 		</label>
 
-		<button type="submit" class="btn" disabled={!secret_input || is_waiting}>Join</button>
+		<button type="submit" class="btn" disabled={!secretInput || form.isWaiting}>Join</button>
 
 		<span>Already joined a class? <a class="link" href="/login">Log in instead</a></span>
 
-		<div class="message">
-			{message}
-		</div>
+		<div class="message">{form.message}</div>
 	</form>
 </main>
+
+<style>
+	.join-code {
+		text-transform: uppercase;
+	}
+</style>

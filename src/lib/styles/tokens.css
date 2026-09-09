@@ -1,0 +1,44 @@
+@layer tokens {
+	:root {
+		/* Dark is the default; the light values come from the old Solarized-light theme. */
+		color-scheme: dark light;
+
+		--clr-red: light-dark(#dc322f, #e6482e);
+		--clr-orange: light-dark(#cb4b16, #f47e1b);
+		--clr-yellow: light-dark(#b58900, #f4b41b);
+		--clr-green: light-dark(#859900, #b6d53c);
+		--clr-blue: light-dark(#2aa198, #28ccdf);
+		--clr-purple: light-dark(#6c71c4, #cd6093);
+
+		--clr-base: light-dark(#fdf6e3, #242022);
+		--clr-bg: light-dark(#ded8c5, #302c2e);
+		--clr-bg-hover: light-dark(#eee8d5, #3d393b);
+		--clr-fg: light-dark(#002b36, #cfc6b8);
+		--clr-fg-hover: light-dark(#073642, #a0938e);
+
+		--clr-input-bg: light-dark(#eee8d5, #181516);
+		--clr-input-fg: light-dark(#002b36, #cfc6b8);
+
+		--clr-accent: light-dark(#2aa198, #b6d53c);
+		--clr-accent-hover: light-dark(#099289, #c3e24d);
+		--clr-on-accent: light-dark(#fdf6e3, #302c2e);
+
+		--clr-warn-bg: light-dark(#faf0d0, #352b24);
+		--clr-warn-fg: light-dark(#b58900, #f4b41b);
+
+		--clr-muted-bg: light-dark(#93a1a1, #5a5353);
+		--clr-muted-fg: light-dark(#657b83, #7d7071);
+
+		--clr-destructive: var(--clr-red);
+
+		--shadow-card-hover: light-dark(none, 0 0 1.5rem rgb(0 0 0 / 0.125));
+		--shadow-dialog: 0 1rem 3rem rgb(0 0 0 / 0.25);
+
+		--font-body: 'Fira Sans', ui-sans-serif, system-ui, sans-serif;
+		--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+		--radius-sm: 3px;
+		--radius: 6px;
+		--radius-lg: 12px;
+	}
+}

@@ -1,7 +1,6 @@
 export * from './array'
 export * as cfg from './config'
 export * from './date'
-export * from './debounce'
 export * from './greeting'
-export * from './project-data'
+export * from './projectData'
 export * as rand from './rand'

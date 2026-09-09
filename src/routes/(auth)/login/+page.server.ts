@@ -1,68 +1,60 @@
 import { cfg } from '$lib'
-import { check, db, schema } from '$lib/server'
-import { grant_session, join_group } from '$lib/server/actions'
+import { check, db, encrypt, needsRehash, schema } from '$lib/server'
+import { userSession } from '$lib/server/auth'
+import { joinGroup } from '$lib/server/actions'
 import { fail, redirect } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import type { Actions } from './$types'
 
 
-export type FormResponse = {
-	status: 'ok'
-} | {
-	status: 'failed'
-	message: string
-}
+const dataSchema = z.object({
+	email: z.string().trim().toLowerCase().min(1, 'An email is required'),
+	password: z.string().min(8, 'Password must be at least 8 characters long'),
+})
 
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
-		const data_schema = z.object({
-			email: z.string().trim().min(1, 'An email is required').toLowerCase(),
-			password: z.string().min(8, 'Password must be at least 8 characters long'),
-		})
-
-		const form_data = Object.fromEntries(await request.formData())
-		const result = await data_schema.safeParseAsync({ ...form_data })
+		const result = dataSchema.safeParse(Object.fromEntries(await request.formData()))
 
 		if (!result.success) {
-			return fail(400, {
-				message: result.error.errors[0].message,
-				// message: result.error.errors.map(({ message }) => message).join('\n'),
-			})
+			return fail(400, { message: result.error.issues[0]!.message })
 		}
 
 		const data = result.data
+		if (!data.email.includes('@')) data.email += cfg.defaultEmailDomain
 
-		if (data.email.indexOf('@') < 0) {
-			data.email += cfg.default_email_domain
-		}
-
-		const user = await (db.query.user.findFirst({
-			where: eq(schema.user.email, data.email),
-		}))
+		const user = await db.query.user.findFirst({ where: { email: data.email } })
 
 		if (!user) {
-			return fail(401, {
-				message: 'No accounts found with that email',
-			})
+			return fail(401, { message: 'No accounts found with that email' })
 		}
 
-		const valid_password = await check(data.password, user.password)
-		if (!valid_password) {
-			return fail(401, {
-				message: 'Invalid email and/or password',
-			})
+		if (!await check(data.password, user.password)) {
+			return fail(401, { message: 'Invalid email and/or password' })
 		}
 
-		await grant_session(user.id, cookies)
+		// Legacy bcrypt hashes are upgraded to argon2id the first time they're used.
+		if (needsRehash(user.password)) {
+			await db.update(schema.user)
+				.set({ password: await encrypt(data.password) })
+				.where(eq(schema.user.id, user.id))
+		}
+
+		await userSession.grant(cookies, {
+			userId: user.id,
+			name: user.name,
+			email: user.email,
+			isAdmin: user.isAdmin,
+		})
 
 		const secret = cookies.get('join_secret')
 		if (secret) {
 			cookies.delete('join_secret', { path: '/' })
-			await join_group(secret, user.id)
+			await joinGroup(secret, user.id)
 		}
 
-		throw redirect(303, '/')
+		redirect(303, '/')
 	},
 }

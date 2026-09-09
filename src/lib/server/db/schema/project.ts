@@ -1,27 +1,28 @@
-import { relations } from 'drizzle-orm'
-import { user } from '.'
+import { index } from 'drizzle-orm/pg-core'
+import type { ProjectData } from '../../../projectData'
 import { id, json, ref, str, table, timestamp } from './shared'
+import { user } from './user'
 
 
 export const project = table('project', {
-	id: id('id'),
-	name: str('name').default('Untitled Project').notNull(),
-	author_id: ref('author_id').notNull().references(() => user.id, { onDelete: 'cascade', }),
-	created_at: timestamp('created_at').notNull(),
-	updated_at: timestamp('updated_at').notNull(),
-	data: json('data'),
-})
-
-
-export const project_relations = relations(project, ({ one }) => ({
-	author: one(user, { fields: [project.author_id], references: [user.id] }),
-}))
+	id: id(),
+	name: str().default('Untitled Project').notNull(),
+	authorId: ref().notNull().references(() => user.id, { onDelete: 'cascade' }),
+	createdAt: timestamp().notNull(),
+	updatedAt: timestamp().notNull(),
+	/** Unguessable public identifier used by `/view/[slug]`. */
+	shareSlug: str(15).notNull().unique('project-share_slug'),
+	data: json<ProjectData>(),
+}, (t) => [
+	index('project-author_id').on(t.authorId),
+])
 
 
 export type ProjectInfo = {
 	id: number,
 	name: string,
-	author_id?: number,
-	created_at: Date,
-	updated_at: Date,
+	authorId?: number,
+	createdAt: Date,
+	updatedAt: Date,
+	shareSlug?: string,
 }

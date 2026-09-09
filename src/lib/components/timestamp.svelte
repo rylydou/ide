@@ -1,43 +1,37 @@
 <script lang="ts">
-	export let date: Date
+	let { date }: { date: Date } = $props()
 
-	let str = ''
-	const intl = new Intl.RelativeTimeFormat(undefined, { style: 'long' })
+	const relative = new Intl.RelativeTimeFormat(undefined, { style: 'long' })
 
-	const update = () => {
-		date = date
-	}
+	const MINUTE = 60_000
+	const HOUR = 60 * MINUTE
+	const DAY = 24 * HOUR
 
-	$: {
-		const now = new Date()
-		const delta_ms = date.getTime() - now.getTime()
-		const delta = Math.floor(delta_ms / 1000)
-		const abs = Math.abs(delta)
+	// Ticks only as often as the displayed unit can change.
+	let now = $state(Date.now())
 
-		if (abs < 60) {
-			str = 'just now'
-			setTimeout(update, delta_ms)
-		} else if (abs < 60 * 60) {
-			str = intl.format(Math.floor(delta / 60), 'minute')
-			setTimeout(update, 60_000)
-		} else if (abs < 60 * 60 * 24) {
-			str = intl.format(Math.floor(delta / 60 / 60), 'hour')
-			setTimeout(update, 3_600_000)
-		} else if (date.getUTCFullYear() < now.getUTCFullYear()) {
-			str = date.toLocaleDateString(undefined, {
-				year: 'numeric',
-				month: 'short',
-				day: 'numeric',
-			})
-		} else if (date > new Date(now.getDate() - 1)) {
-			str = 'Yesterday'
-		} else {
-			str = date.toLocaleDateString(undefined, {
-				month: 'short',
-				day: 'numeric',
-			})
-		}
-	}
+	const delta = $derived(date.getTime() - now)
+	const abs = $derived(Math.abs(delta))
+
+	const label = $derived.by(() => {
+		if (abs < MINUTE) return 'just now'
+		if (abs < HOUR) return relative.format(Math.round(delta / MINUTE), 'minute')
+		if (abs < DAY) return relative.format(Math.round(delta / HOUR), 'hour')
+		if (abs < 2 * DAY && delta < 0) return 'Yesterday'
+
+		return date.toLocaleDateString(undefined, {
+			year: date.getFullYear() === new Date(now).getFullYear() ? undefined : 'numeric',
+			month: 'short',
+			day: 'numeric',
+		})
+	})
+
+	$effect(() => {
+		if (abs >= DAY) return
+
+		const interval = setInterval(() => (now = Date.now()), abs < HOUR ? MINUTE : HOUR)
+		return () => clearInterval(interval)
+	})
 </script>
 
-<time datetime={date.toUTCString()}>{str}</time>
+<time datetime={date.toISOString()}>{label}</time>
