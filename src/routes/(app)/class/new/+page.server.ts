@@ -5,8 +5,8 @@ import type { PageServerLoad } from './$types'
 
 export const load = (async ({ locals }) => {
 	if (!locals.session) redirect(303, '/login')
-	const { user } = locals.session
-	if (!user.isAdmin) error(403, 'You have to be an admin to create a class.')
+	const session = locals.session
+	if (!session.isAdmin) error(403, 'You have to be an admin to create a class.')
 
 	const [group] = await db.insert(schema.group).values({
 		name: randomName(),
@@ -14,7 +14,7 @@ export const load = (async ({ locals }) => {
 	}).returning()
 
 	await db.insert(schema.usersToGroups).values({
-		userId: user.id,
+		userId: session.userId,
 		groupId: group!.id,
 	})
 

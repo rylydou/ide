@@ -1,6 +1,7 @@
 import { cfg } from '$lib'
 import { db, encrypt, schema } from '$lib/server'
-import { grantSession, joinGroup } from '$lib/server/actions'
+import { userSession } from '$lib/server/auth'
+import { joinGroup } from '$lib/server/actions'
 import { fail, redirect } from '@sveltejs/kit'
 import { z } from 'zod'
 import type { Actions, PageServerLoad } from './$types'
@@ -67,7 +68,12 @@ export const actions: Actions = {
 		}).returning()
 
 		cookies.delete('join_secret', { path: '/' })
-		await grantSession(newUser!.id, cookies)
+		await userSession.grant(cookies, {
+			userId: newUser!.id,
+			name: newUser!.name,
+			email: newUser!.email,
+			isAdmin: newUser!.isAdmin,
+		})
 		await joinGroup(secret, newUser!.id)
 
 		redirect(303, '/')

@@ -1,4 +1,4 @@
-import { AuthSession } from './lib/types/auth-session'
+import type { UserSession } from '$lib/types'
 
 declare global {
 	namespace App {
@@ -6,15 +6,12 @@ declare global {
 			message?: string
 		}
 		interface Locals {
-			session?: AuthSession
+			session?: UserSession
 		}
 		interface PageData {
-			session?: AuthSession
+			session?: UserSession
 		}
-		// interface PageState {}
-		// interface Platform {}
 	}
 }
 
-
-export { }
+export {}

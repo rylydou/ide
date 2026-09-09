@@ -5,10 +5,10 @@ import type { PageServerLoad } from './$types'
 
 export const load = (async ({ locals }) => {
 	if (!locals.session) redirect(303, '/login')
-	const { user } = locals.session
+	const session = locals.session
 
 	const [project] = await db.insert(schema.project).values({
-		authorId: user.id,
+		authorId: session.userId,
 		name: randomName(),
 		shareSlug: urlId(15),
 	}).returning()

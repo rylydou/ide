@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "d60f7638-c48d-441b-b63e-205badab268f",
+  "id": "081a4104-92aa-4873-af4c-4f7a5e3dab45",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -218,7 +218,46 @@
       "default": "now()",
       "generated": null,
       "identity": null,
-      "name": "expires",
+      "name": "expires_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "session"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "used_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "session"
+    },
+    {
+      "type": "varchar(30)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "previous_token",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "session"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "rotated_at",
       "entityType": "columns",
       "schema": "public",
       "table": "session"
@@ -382,7 +421,7 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "expires",
+          "value": "expires_at",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -394,7 +433,28 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "session-expires",
+      "name": "session-expires_at",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "session"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "previous_token",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "session-previous_token",
       "entityType": "indexes",
       "schema": "public",
       "table": "session"

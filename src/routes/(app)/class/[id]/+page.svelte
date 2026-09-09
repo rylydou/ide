@@ -37,7 +37,7 @@
 		<header>
 			<a class="btn btn-text" href="/"><div class="icon-home"></div> Home</a>
 
-			{#if data.session.user.isAdmin}
+			{#if data.session.isAdmin}
 				<button class="btn btn-text" onclick={() => editDialog?.showModal()}>
 					<div class="icon-pencil"></div> Edit Class
 				</button>

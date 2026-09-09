@@ -20,7 +20,7 @@
 	let cssCode = $state(initial.cssCode)
 	let jsCode = $state(initial.jsCode)
 
-	let isAuthor = $state(project.authorId === session.user.id)
+	let isAuthor = $state(project.authorId === session.userId)
 	let isSaving = $state(false)
 	let isDirty = $state(false)
 	let hasEdited = $state(false)
@@ -79,8 +79,9 @@
 		const { forkedTo } = await response.json() as { forkedTo?: number }
 		if (forkedTo) {
 			project.id = forkedTo
-			project.author = session.user
-			project.authorId = session.user.id
+			// The fork belongs to us now; the session carries only what the byline needs.
+			project.author = { ...project.author, id: session.userId, name: session.name }
+			project.authorId = session.userId
 			isAuthor = true
 			// The fork lives at a new URL; swap it in without a navigation.
 			history.replaceState(history.state, '', `/project/${project.id}`)
@@ -105,7 +106,7 @@
 		<div class="header-start">
 			<a class="btn btn-text" href="/"><div class="icon-home"></div> Home</a>
 
-			{#if isAuthor || session.user.isAdmin}
+			{#if isAuthor || session.isAdmin}
 				<button
 					class="btn btn-text"
 					class:btn-destructive={deleteConfirm}

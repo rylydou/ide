@@ -78,6 +78,36 @@ Relations live in one place — `src/lib/server/db/relations.ts` — using Drizz
 so queries never mention it. Filters use the v2 object syntax (`where: { authorId: user.id }`)
 rather than `eq(...)`, and a class's access check is expressed as a filter on the related users.
 
+## Authentication
+
+Two tokens, both `httpOnly` cookies:
+
+- **`session_token`** — a 30-char opaque string with a row in the `session` table. The only
+  revocable credential, and the only thing a database lookup can invalidate.
+- **`access_token`** — a short-lived HS256 JWT (signed with [jose](https://github.com/panva/jose),
+  on Web Crypto) carrying the session payload, so an ordinary request from a signed-in user needs
+  no query at all. When it expires, the session token mints a new one.
+
+The generic factory is [src/lib/server/common/auth.ts](src/lib/server/common/auth.ts); this app's
+instance is [src/lib/server/auth.ts](src/lib/server/auth.ts), and [hooks.server.ts](src/hooks.server.ts)
+puts the result on `locals.session`.
+
+Tunables live in [src/lib/config.ts](src/lib/config.ts). Session tokens rotate on every refresh, so a
+stolen one is single-use, and each user keeps at most `maxSessionsPerUser` live sessions. A
+rotated-away token keeps working for 30 seconds (`rotationGrace`) — without that, two requests
+racing to refresh the same expired access token would sign the loser out, which happens in bursts
+on every restart.
+
+**There is no JWT secret to configure.** The signing key is 32 random bytes generated at startup.
+Access tokens are only a cache in front of the `session` table, so a restart invalidates them all
+and costs each signed-in user one extra query — nobody is signed out. This does mean the app must
+run as a **single instance**; two replicas would reject each other's access tokens. Scaling out
+means moving the key to a shared secret.
+
+Because access tokens are self-contained, revoking a session server-side does not take effect
+until the outstanding token expires — `accessTokenTimeToLive` (15m) is the worst-case revocation
+delay. Shorten it if that matters more than the saved queries.
+
 ## Notes
 
 - The live preview runs student code in an iframe with `sandbox="allow-scripts …"` and **no**

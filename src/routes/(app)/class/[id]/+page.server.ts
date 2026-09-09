@@ -10,7 +10,7 @@ const groupIdSchema = z.coerce.number().int('id must be a whole number')
 
 export const load = (async ({ locals, params }) => {
 	if (!locals.session) redirect(303, '/login')
-	const { user } = locals.session
+	const session = locals.session
 
 	const groupId = groupIdSchema.safeParse(params.id)
 	if (!groupId.success) error(400)
@@ -18,7 +18,7 @@ export const load = (async ({ locals, params }) => {
 	const group = await db.query.group.findFirst({
 		// Membership is the access check, expressed as a filter on the related users —
 		// a non-member gets no row at all, so other classes never leak their existence.
-		where: { id: groupId.data, users: { id: user.id } },
+		where: { id: groupId.data, users: { id: session.userId } },
 		with: {
 			users: {
 				columns: { id: true, name: true, isAdmin: true },
@@ -38,7 +38,7 @@ export const load = (async ({ locals, params }) => {
 			id: group.id,
 			name: group.name,
 			// The join code is an invite credential; only admins may see it.
-			secret: user.isAdmin ? group.secret : null,
+			secret: session.isAdmin ? group.secret : null,
 			users: group.users,
 		},
 	}
@@ -59,8 +59,8 @@ export const actions: Actions = {
 	 */
 	update: async ({ request, locals, params }) => {
 		if (!locals.session) redirect(303, '/login')
-		const { user } = locals.session
-		if (!user.isAdmin) error(403, 'You have to be an admin to update a class.')
+		const session = locals.session
+		if (!session.isAdmin) error(403, 'You have to be an admin to update a class.')
 
 		const groupId = groupIdSchema.safeParse(params.id)
 		if (!groupId.success) error(400)
@@ -85,13 +85,13 @@ export const actions: Actions = {
 	/** Remove the current user from this class. */
 	leave: async ({ locals, params }) => {
 		if (!locals.session) redirect(303, '/login')
-		const { user } = locals.session
+		const session = locals.session
 
 		const groupId = groupIdSchema.safeParse(params.id)
 		if (!groupId.success) error(400)
 
 		await db.delete(schema.usersToGroups).where(and(
-			eq(schema.usersToGroups.userId, user.id),
+			eq(schema.usersToGroups.userId, session.userId),
 			eq(schema.usersToGroups.groupId, groupId.data),
 		))
 

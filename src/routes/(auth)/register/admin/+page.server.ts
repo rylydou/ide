@@ -1,6 +1,6 @@
 import { env } from '$env/dynamic/private'
 import { db, encrypt, schema } from '$lib/server'
-import { grantSession } from '$lib/server/actions'
+import { userSession } from '$lib/server/auth'
 import { fail, redirect } from '@sveltejs/kit'
 import { timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
@@ -52,7 +52,12 @@ export const actions: Actions = {
 		}).returning()
 
 		cookies.delete('join_secret', { path: '/' })
-		await grantSession(newUser!.id, cookies)
+		await userSession.grant(cookies, {
+			userId: newUser!.id,
+			name: newUser!.name,
+			email: newUser!.email,
+			isAdmin: newUser!.isAdmin,
+		})
 
 		redirect(303, '/')
 	},

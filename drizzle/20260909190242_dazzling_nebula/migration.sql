@@ -17,7 +17,10 @@ CREATE TABLE "project" (
 CREATE TABLE "session" (
 	"token" varchar(30) PRIMARY KEY,
 	"user_id" integer NOT NULL,
-	"expires" timestamp with time zone DEFAULT now() NOT NULL
+	"expires_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"used_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"previous_token" varchar(30),
+	"rotated_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE "user" (
@@ -37,7 +40,8 @@ CREATE TABLE "users_to_groups" (
 --> statement-breakpoint
 CREATE INDEX "project-author_id" ON "project" ("author_id");--> statement-breakpoint
 CREATE INDEX "session-user_id" ON "session" ("user_id");--> statement-breakpoint
-CREATE INDEX "session-expires" ON "session" ("expires");--> statement-breakpoint
+CREATE INDEX "session-expires_at" ON "session" ("expires_at");--> statement-breakpoint
+CREATE INDEX "session-previous_token" ON "session" ("previous_token");--> statement-breakpoint
 ALTER TABLE "project" ADD CONSTRAINT "project_author_id_user_id_fkey" FOREIGN KEY ("author_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "users_to_groups" ADD CONSTRAINT "users_to_groups_user_id_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;--> statement-breakpoint

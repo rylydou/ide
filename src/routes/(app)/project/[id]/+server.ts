@@ -33,7 +33,7 @@ const getProject = async (paramsId: unknown) => {
 
 export const PUT: RequestHandler = async ({ request, locals, params }) => {
 	if (!locals.session) error(401)
-	const { user } = locals.session
+	const session = locals.session
 
 	const project = await getProject(params.id)
 
@@ -42,7 +42,7 @@ export const PUT: RequestHandler = async ({ request, locals, params }) => {
 	const newProject = result.data
 
 	// Authors save in place; everyone else gets a fork of their own.
-	if (project.authorId === user.id) {
+	if (project.authorId === session.userId) {
 		await db.update(schema.project).set({
 			...newProject,
 			updatedAt: new Date(),
@@ -54,7 +54,7 @@ export const PUT: RequestHandler = async ({ request, locals, params }) => {
 	const [forked] = await db.insert(schema.project).values({
 		name: newProject.name,
 		data: newProject.data,
-		authorId: user.id,
+		authorId: session.userId,
 		shareSlug: urlId(15),
 	}).returning()
 
@@ -64,11 +64,11 @@ export const PUT: RequestHandler = async ({ request, locals, params }) => {
 
 export const DELETE: RequestHandler = async ({ locals, params }) => {
 	if (!locals.session) error(401)
-	const { user } = locals.session
+	const session = locals.session
 
 	const project = await getProject(params.id)
 
-	if (!user.isAdmin && project.authorId !== user.id) error(403)
+	if (!session.isAdmin && project.authorId !== session.userId) error(403)
 
 	await db.delete(schema.project).where(eq(schema.project.id, project.id))
 	return json({})

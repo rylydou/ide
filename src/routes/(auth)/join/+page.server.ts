@@ -41,7 +41,7 @@ export const actions: Actions = {
 			redirect(303, '/register')
 		}
 
-		await joinGroup(secret, session.user.id)
+		await joinGroup(secret, session.userId)
 		redirect(303, '/')
 	},
 }

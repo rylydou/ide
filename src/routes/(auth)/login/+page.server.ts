@@ -1,6 +1,7 @@
 import { cfg } from '$lib'
 import { check, db, encrypt, needsRehash, schema } from '$lib/server'
-import { grantSession, joinGroup } from '$lib/server/actions'
+import { userSession } from '$lib/server/auth'
+import { joinGroup } from '$lib/server/actions'
 import { fail, redirect } from '@sveltejs/kit'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
@@ -41,7 +42,12 @@ export const actions: Actions = {
 				.where(eq(schema.user.id, user.id))
 		}
 
-		await grantSession(user.id, cookies)
+		await userSession.grant(cookies, {
+			userId: user.id,
+			name: user.name,
+			email: user.email,
+			isAdmin: user.isAdmin,
+		})
 
 		const secret = cookies.get('join_secret')
 		if (secret) {

@@ -33,6 +33,11 @@
 <main class="dash-layout">
 	<header>
 		<h1>{greeting}</h1>
+		<form method="post" action="/logout">
+			<button class="btn btn-text" type="submit">
+				<div class="icon-close"></div> Sign out
+			</button>
+		</form>
 	</header>
 
 	<section>
@@ -41,7 +46,7 @@
 				<GroupCard {group} />
 			{/each}
 
-			{#if data.session.user.isAdmin}
+			{#if data.session.isAdmin}
 				<div class="card-group">
 					<div class="card card-new">
 						<a class="card-link" href="/join">Join class</a>

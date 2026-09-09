@@ -5,7 +5,7 @@ import type { LayoutServerLoad } from './$types'
 export const load: LayoutServerLoad = async ({ url, locals, cookies }) => {
 	const session = locals.session
 
-	if (!session?.user) {
+	if (!session) {
 		cookies.set('continue_to', url.pathname + url.search, {
 			path: '/',
 			httpOnly: true,
